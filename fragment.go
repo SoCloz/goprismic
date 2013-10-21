@@ -2,34 +2,67 @@ package goprismic
 
 import (
 	"encoding/json"
+	"fmt"
+
+	"github.com/SoCloz/goprismic/fragment"
 )
 
-type Fragments map[string]Fragment
+type FragmentTree map[string]Fragments
 
-type Fragment struct {
+type Fragments map[string]FragmentList
+type FragmentList []FragmentInterface
+
+type FragmentEnvelope struct {
 	Type    string          `json:"type"`
-	Content FragmentContent `json:"-"`
+	Value	interface{}
 }
 
-type FragmentContent interface{}
+type FragmentInterface interface{
+	Decode(interface{}) error
+}
 
-func (fs Fragment) UnmarshalJSON(data []byte) error {
-	var raw struct {
-		Type string `json:"type"`
+func (fs *FragmentList) UnmarshalJSON(data []byte) error {
+	*fs = make(FragmentList, 0, 128)
+	raw := []FragmentEnvelope{}
+	if data[0] == '{' {
+		data = append([]byte{byte('[')}, data...)
+		data = append(data, byte(']'))
 	}
 	err := json.Unmarshal(data, &raw)
 	if err != nil {
 		return err
 	}
-	fs.Type = raw.Type
-	switch raw.Type {
-	case "StructuredText":
-		fs.Content = new(StructuredTextContent)
-	case "Image":
-		fs.Content = new(ImageContent)
+	for _, v := range raw {
+		var n FragmentInterface
+
+		switch v.Type {
+		case "StructuredText":
+			st := make(fragment.StructuredText, 0, 128)
+			n = &st
+		case "Image":
+			n = new(fragment.Image)
+		case "Color":
+			n = new(fragment.Color)
+		case "Number":
+			n = new(fragment.Number)
+		case "Date":
+			n = new(fragment.Date)
+		case "Text":
+			n = new(fragment.Text)
+		case "Link.web":
+			n = new(fragment.WebLink)
+		case "Link.document":
+			n = new(fragment.DocumentLink)
+		default:
+			panic(fmt.Sprintf("Unknown fragment type %s", v.Type))
+		}
+		err := n.Decode(v.Value)
+		if err != nil {
+			//log.Errorf("goprismic: unable to decode fragment : %s\n", err)
+			return err
+		}
+		//fmt.Printf("\n%s => %+v\n", v.Type, n)
+		(*fs) = append(*fs, n)
 	}
-	if fs.Content != nil {
-		err = json.Unmarshal(data, &fs.Content)
-	}
-	return err
+	return nil
 }

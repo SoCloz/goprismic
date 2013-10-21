@@ -28,7 +28,7 @@ func (s *SearchForm) Form(name string) *SearchForm {
 	}
 	s.form = &form
 	for name, f := range form.Fields {
-		if name != "q" && f.Default != "" {
+		if f.Default != "" {
 			s.data[name] = f.Default
 		}
 	}
