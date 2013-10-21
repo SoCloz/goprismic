@@ -58,9 +58,9 @@ func (b *BaseBlock) Decode(enc interface{}) error {
 					case "strong":
 						s = new(span.Strong)
 					case "em":
-						s = new(span.Strong)
+						s = new(span.Em)
 					case "hyperlink":
-						s = new(span.Strong)
+						s = new(span.Hyperlink)
 					default:
 						panic(fmt.Sprintf("Unknown span type %s", dec3["type"]))
 				}
