@@ -1,6 +1,6 @@
 package block
 
-import(
+import (
 	"fmt"
 )
 
@@ -9,7 +9,7 @@ type Paragraph struct {
 }
 
 func (p *Paragraph) AsHtml() string {
-	return fmt.Sprintf("<p>%s</p>", p.FormatHtmlText());
+	return fmt.Sprintf("<p>%s</p>", p.FormatHtmlText())
 }
 
 func (p *Paragraph) ParentHtmlTag() string {

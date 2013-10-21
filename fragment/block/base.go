@@ -1,14 +1,14 @@
 package block
 
-import(
+import (
 	"fmt"
 
 	"github.com/SoCloz/goprismic/fragment/span"
 )
 
 type BaseBlock struct {
-	Type  string `json:"type"`
-	Text  string `json:"text"`
+	Type  string               `json:"type"`
+	Text  string               `json:"text"`
 	Spans []span.SpanInterface `json:"spans"`
 }
 
@@ -22,12 +22,12 @@ func (b *BaseBlock) FormatHtmlText() string {
 	for _, s := range b.Spans {
 		begin := s.HtmlBeginTag()
 		end := s.HtmlEndTag()
-		t = t[:offsets[s.GetStart()]]+begin+t[offsets[s.GetStart()]:offsets[s.GetEnd()]]+end+t[offsets[s.GetEnd()]:]
+		t = t[:offsets[s.GetStart()]] + begin + t[offsets[s.GetStart()]:offsets[s.GetEnd()]] + end + t[offsets[s.GetEnd()]:]
 		for i := s.GetStart(); i < s.GetEnd(); i++ {
 			offsets[i] += len(begin)
 		}
 		for i := s.GetEnd(); i < len(offsets); i++ {
-			offsets[i] += len(begin)+len(end)
+			offsets[i] += len(begin) + len(end)
 		}
 	}
 	return t
@@ -55,19 +55,19 @@ func (b *BaseBlock) Decode(enc interface{}) error {
 			if ok {
 				var s span.SpanInterface
 				switch dec3["type"] {
-					case "strong":
-						s = new(span.Strong)
-					case "em":
-						s = new(span.Em)
-					case "hyperlink":
-						s = new(span.Hyperlink)
-					default:
-						panic(fmt.Sprintf("Unknown span type %s", dec3["type"]))
+				case "strong":
+					s = new(span.Strong)
+				case "em":
+					s = new(span.Em)
+				case "hyperlink":
+					s = new(span.Hyperlink)
+				default:
+					panic(fmt.Sprintf("Unknown span type %s", dec3["type"]))
 				}
 				s.Decode(v)
 				b.Spans = append(b.Spans, s)
 			}
-    	}
+		}
 	}
 	return nil
 }

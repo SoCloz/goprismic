@@ -1,6 +1,6 @@
 package span
 
-import(
+import (
 	"fmt"
 )
 

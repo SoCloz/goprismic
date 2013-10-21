@@ -1,6 +1,6 @@
 package fragment
 
-import(
+import (
 	"fmt"
 )
 
@@ -44,7 +44,7 @@ func (i *ImageView) Decode(enc interface{}) error {
 }
 
 func (i *ImageView) AsHtml() string {
-	return fmt.Sprintf("<img src=\"%s\" width=\"%d\" height=\"%d\"/>", i.Url, i.Dimensions.Width, i.Dimensions.Height);
+	return fmt.Sprintf("<img src=\"%s\" width=\"%d\" height=\"%d\"/>", i.Url, i.Dimensions.Width, i.Dimensions.Height)
 }
 
 type Image struct {
@@ -52,6 +52,7 @@ type Image struct {
 	Views map[string]ImageView `json:"views"`
 }
 
+// Returns a view of this image
 func (i *Image) GetView(view string) (*ImageView, bool) {
 	v, found := i.Views[view]
 	return &v, found

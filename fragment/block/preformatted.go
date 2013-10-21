@@ -1,6 +1,6 @@
 package block
 
-import(
+import (
 	"fmt"
 )
 
@@ -9,7 +9,7 @@ type Preformatted struct {
 }
 
 func (p *Preformatted) AsHtml() string {
-	return fmt.Sprintf("<pre>%s</pre>", p.FormatHtmlText());
+	return fmt.Sprintf("<pre>%s</pre>", p.FormatHtmlText())
 }
 
 func (p *Preformatted) ParentHtmlTag() string {

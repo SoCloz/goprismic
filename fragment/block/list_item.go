@@ -1,6 +1,6 @@
 package block
 
-import(
+import (
 	"fmt"
 )
 
@@ -9,7 +9,7 @@ type ListItem struct {
 }
 
 func (l *ListItem) AsHtml() string {
-	return fmt.Sprintf("<li>%s</li>", l.FormatHtmlText());
+	return fmt.Sprintf("<li>%s</li>", l.FormatHtmlText())
 }
 
 func (l *ListItem) ParentHtmlTag() string {
@@ -21,7 +21,7 @@ type OrderedListItem struct {
 }
 
 func (l *OrderedListItem) AsHtml() string {
-	return fmt.Sprintf("<li>%s</li>", l.FormatHtmlText());
+	return fmt.Sprintf("<li>%s</li>", l.FormatHtmlText())
 }
 
 func (l *OrderedListItem) ParentHtmlTag() string {

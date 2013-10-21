@@ -1,6 +1,6 @@
 package fragment
 
-import(
+import (
 	"fmt"
 )
 
@@ -21,7 +21,7 @@ func (l *WebLink) Decode(enc interface{}) error {
 
 type DocumentLink struct {
 	Document struct {
-		Id string
+		Id   string
 		Type string
 		Slug string
 	}

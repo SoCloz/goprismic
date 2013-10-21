@@ -1,6 +1,6 @@
 package fragment
 
-import(
+import (
 	"fmt"
 
 	"github.com/SoCloz/goprismic/fragment/block"
@@ -38,7 +38,7 @@ func (st *StructuredText) Decode(enc interface{}) error {
 		default:
 			panic(fmt.Sprintf("Unknown block type %s", dec["type"]))
 		}
-		err:= b.Decode(v)
+		err := b.Decode(v)
 		if err != nil {
 			//fmt.Printf("\n!!! %s\n", err)
 			return err
@@ -49,6 +49,7 @@ func (st *StructuredText) Decode(enc interface{}) error {
 	return nil
 }
 
+// Formats the fragment content as html
 func (st StructuredText) AsHtml() string {
 	parentTag := ""
 	html := ""

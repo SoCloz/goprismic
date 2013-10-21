@@ -5,7 +5,7 @@ type Hyperlink struct {
 }
 
 func (h *Hyperlink) HtmlBeginTag() string {
-	return "<a href>"
+	return "<a href=\"#\">"
 }
 
 func (h *Hyperlink) HtmlEndTag() string {

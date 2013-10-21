@@ -1,6 +1,6 @@
 package block
 
-import(
+import (
 	"fmt"
 )
 
@@ -9,7 +9,7 @@ type Image struct {
 }
 
 func (i *Image) AsHtml() string {
-	return fmt.Sprintf("<img>%s</ig>", i.Text);
+	return fmt.Sprintf("<img>%s</ig>", i.Text)
 }
 
 func (i *Image) ParentHtmlTag() string {

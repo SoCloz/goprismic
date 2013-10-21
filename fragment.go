@@ -13,11 +13,11 @@ type Fragments map[string]FragmentList
 type FragmentList []FragmentInterface
 
 type FragmentEnvelope struct {
-	Type    string          `json:"type"`
-	Value	interface{}
+	Type  string `json:"type"`
+	Value interface{}
 }
 
-type FragmentInterface interface{
+type FragmentInterface interface {
 	Decode(interface{}) error
 }
 
