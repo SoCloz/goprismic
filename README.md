@@ -13,9 +13,9 @@ Usage
 -----
 
 ```go
-api, err := goprismic.Get("http://myrepo.prismic.io/api", "repo key")
+api, err := goprismic.Get("https://myrepo.prismic.io/api", "repo key")
 
-docs, err := api.Master().Form("everything").Submit()
+docs, err := api.Master().Form("everything").Query("[[:d = at(document.tags, [\"Featured\"])]]").Submit()
 if err != nil {
 	// handle error
 }
