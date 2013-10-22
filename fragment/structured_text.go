@@ -40,10 +40,8 @@ func (st *StructuredText) Decode(enc interface{}) error {
 		}
 		err := b.Decode(v)
 		if err != nil {
-			//fmt.Printf("\n!!! %s\n", err)
 			return err
 		}
-		//fmt.Printf("\n%+v => %+v\n", dec, b)
 		*st = append(*st, b)
 	}
 	return nil

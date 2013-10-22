@@ -69,7 +69,6 @@ func (a *Api) call(u string, data map[string]string, res interface{}) error {
 	}
 	callurl.RawQuery = values.Encode()
 
-	//fmt.Printf("call %s\n", callurl.String())
 	req, errreq := http.NewRequest("GET", callurl.String(), nil)
 	if errreq != nil {
 		return errreq
@@ -81,7 +80,6 @@ func (a *Api) call(u string, data map[string]string, res interface{}) error {
 		return errdo
 	}
 	encoded, errread := ioutil.ReadAll(resp.Body)
-	//fmt.Println(string(encoded))
 	if errread != nil {
 		return errread
 	}
@@ -95,6 +93,5 @@ func (a *Api) call(u string, data map[string]string, res interface{}) error {
 		}
 	}
 	errjson := json.Unmarshal(encoded, res)
-	//fmt.Printf("\n%+v\n", res)
 	return errjson
 }

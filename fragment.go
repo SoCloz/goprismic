@@ -68,7 +68,6 @@ func (fs *FragmentList) UnmarshalJSON(data []byte) error {
 			log.Printf("goprismic: unable to decode fragment : %s\n", err)
 			return err
 		}
-		//fmt.Printf("\n%s => %+v\n", v.Type, n)
 		(*fs) = append(*fs, n)
 	}
 	return nil
