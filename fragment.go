@@ -20,6 +20,8 @@ type FragmentEnvelope struct {
 
 type FragmentInterface interface {
 	Decode(interface{}) error
+	AsText() string
+	AsHtml() string
 }
 
 func (fs *FragmentList) UnmarshalJSON(data []byte) error {
@@ -54,8 +56,12 @@ func (fs *FragmentList) UnmarshalJSON(data []byte) error {
 			n = new(fragment.WebLink)
 		case "Link.document":
 			n = new(fragment.DocumentLink)
+		case "Embed":
+			n = new(fragment.Embed)
+		case "Select":
+			n = new(fragment.Text)
 		default:
-			panic(fmt.Sprintf("Unknown fragment type %s", v.Type))
+			return fmt.Errorf("Unknown fragment type %s", v.Type)
 		}
 		err := n.Decode(v.Value)
 		if err != nil {

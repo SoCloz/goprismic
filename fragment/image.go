@@ -44,8 +44,16 @@ func (i *ImageView) Decode(enc interface{}) error {
 	return nil
 }
 
+func (i *ImageView) AsText() string {
+	return i.Url
+}
+
 func (i *ImageView) AsHtml() string {
 	return fmt.Sprintf("<img src=\"%s\" width=\"%d\" height=\"%d\"/>", i.Url, i.Dimensions.Width, i.Dimensions.Height)
+}
+
+func (i *ImageView) Ratio() float64 {
+	return float64(i.Dimensions.Width)/float64(i.Dimensions.Height)
 }
 
 type Image struct {
@@ -80,4 +88,12 @@ func (i *Image) Decode(enc interface{}) error {
 		}
 	}
 	return nil
+}
+
+func (i *Image) AsText() string {
+	return i.Main.AsText()
+}
+
+func (i *Image) AsHtml() string {
+	return i.Main.AsHtml()
 }

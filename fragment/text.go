@@ -15,3 +15,11 @@ func (t *Text) Decode(enc interface{}) error {
 	*t = Text(dec)
 	return nil
 }
+
+func (t *Text) AsText() string {
+	return string(*t)
+}
+
+func (t *Text) AsHtml() string {
+	return fmt.Sprintf("<span class=\"text\">%s</span>", *t)
+}

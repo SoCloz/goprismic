@@ -20,6 +20,14 @@ func (l *WebLink) Decode(enc interface{}) error {
 	return nil
 }
 
+func (l *WebLink) AsText() string {
+	return l.Url
+}
+
+func (l *WebLink) AsHtml() string {
+	return l.Url
+}
+
 type DocumentLink struct {
 	Document struct {
 		Id   string
@@ -53,4 +61,12 @@ func (l *DocumentLink) Decode(enc interface{}) error {
 		l.IsBroken = v.(bool)
 	}
 	return nil
+}
+
+func (l *DocumentLink) AsText() string {
+	return ""
+}
+
+func (l *DocumentLink) AsHtml() string {
+	return ""
 }

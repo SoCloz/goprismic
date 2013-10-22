@@ -71,6 +71,7 @@ func (st StructuredText) AsHtml() string {
 	return html
 }
 
+// Formats the fragment content as text
 func (st StructuredText) AsText() string {
 	text := ""
 	for _, v := range st {
@@ -80,4 +81,37 @@ func (st StructuredText) AsText() string {
 		text += v.AsText()
 	}
 	return text
+}
+
+// Returns the first paragraph fragment
+func (st StructuredText) GetFirstParagraph() (*block.Paragraph, bool) {
+	for k := range st {
+		b, ok := st[k].(*block.Paragraph)
+		if ok {
+			return b, true
+		}
+	}
+	return nil, false
+}
+
+// Returns the first preformatted fragment
+func (st StructuredText) GetFirstPreformatted() (*block.Preformatted, bool) {
+	for k := range st {
+		b, ok := st[k].(*block.Preformatted)
+		if ok {
+			return b, true
+		}
+	}
+	return nil, false
+}
+
+// Returns the first image fragment
+func (st StructuredText) GetFirstImage() (*block.Image, bool) {
+	for k := range st {
+		b, ok := st[k].(*block.Image)
+		if ok {
+			return b, true
+		}
+	}
+	return nil, false
 }

@@ -15,3 +15,11 @@ func (c *Color) Decode(enc interface{}) error {
 	*c = Color(res)
 	return nil
 }
+
+func (c *Color) AsText() string {
+	return string(*c)
+}
+
+func (c *Color) AsHtml() string {
+	return fmt.Sprintf("<span class=\"number\">%d</span>", *c)
+}
