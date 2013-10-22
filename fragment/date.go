@@ -6,15 +6,27 @@ import (
 	"time"
 )
 
-type Date struct {
-	Value time.Time `json:"value"`
-}
+type Date time.Time
 
 func (d *Date) Decode(enc interface{}) error {
-	_, ok := enc.(string)
+	dec, ok := enc.(string)
 	if !ok {
 		return fmt.Errorf("unable to decode date fragment : %+v is a %s, not a string", enc, reflect.TypeOf(enc))
 	}
-	//*d = res
+	date, err := time.Parse("2006-01-02", dec)
+	if err != nil {
+		return err
+	}
+	*d = Date(date)
 	return nil
+}
+
+func (d *Date) AsText() string {
+	t := time.Time(*d)
+	return t.Format("2006-01-02")
+}
+
+func (d *Date) AsHtml() string {
+	t := time.Time(*d)
+	return "<time>"+t.Format("2006-01-02")+"</time>"
 }
