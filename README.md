@@ -1,6 +1,8 @@
 goprismic
 =========
 
+[![Build Status](https://secure.travis-ci.org/SoCloz/goprismic.png?branch=master)](http://travis-ci.org/SoCloz/goprismic)
+
 Prismic.io client kit for Go
 
 This client has not (yet) been field tested - use at your own risk.
@@ -8,8 +10,6 @@ This client has not (yet) been field tested - use at your own risk.
 TODO :
 
 * links
-* godoc
-* unit tests
 
 Usage
 -----
