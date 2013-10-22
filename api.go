@@ -59,9 +59,9 @@ func (a *Api) createSearchForm(r Ref) *SearchForm {
 }
 
 func (a *Api) call(u string, data map[string]string, res interface{}) error {
-	callurl, err0 := url.Parse(u)
-	if err0 != nil {
-		return err0
+	callurl, errparse := url.Parse(u)
+	if errparse != nil {
+		return errparse
 	}
 	values := callurl.Query()
 	for k, v := range data {
@@ -70,22 +70,31 @@ func (a *Api) call(u string, data map[string]string, res interface{}) error {
 	callurl.RawQuery = values.Encode()
 
 	//fmt.Printf("call %s\n", callurl.String())
-	req, err := http.NewRequest("GET", callurl.String(), nil)
-	if err != nil {
-		return err
+	req, errreq := http.NewRequest("GET", callurl.String(), nil)
+	if errreq != nil {
+		return errreq
 	}
 	req.Header.Add("Accept", "application/json")
-	resp, err2 := http.DefaultClient.Do(req)
+	resp, errdo := http.DefaultClient.Do(req)
 	defer resp.Body.Close()
-	if err2 != nil {
-		return err2
+	if errdo != nil {
+		return errdo
 	}
-	encoded, err3 := ioutil.ReadAll(resp.Body)
+	encoded, errread := ioutil.ReadAll(resp.Body)
 	//fmt.Println(string(encoded))
-	if err3 != nil {
-		return err3
+	if errread != nil {
+		return errread
 	}
-	err4 := json.Unmarshal(encoded, res)
+	if resp.StatusCode != 200 {
+		err := new(PrismicError)
+		errjson := json.Unmarshal(encoded, err)
+		if errjson != nil {
+			return errjson
+		} else {
+			return err
+		}
+	}
+	errjson := json.Unmarshal(encoded, res)
 	//fmt.Printf("\n%+v\n", res)
-	return err4
+	return errjson
 }

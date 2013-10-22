@@ -36,7 +36,7 @@ func (st *StructuredText) Decode(enc interface{}) error {
 		case "embed":
 			b = new(block.Embed)
 		default:
-			panic(fmt.Sprintf("Unknown block type %s", dec["type"]))
+			panic(fmt.Sprintf("unknown block type %s", dec["type"]))
 		}
 		err := b.Decode(v)
 		if err != nil {

@@ -2,6 +2,7 @@ package fragment
 
 import (
 	"fmt"
+	"reflect"
 )
 
 type WebLink struct {
@@ -11,7 +12,7 @@ type WebLink struct {
 func (l *WebLink) Decode(enc interface{}) error {
 	dec, ok := enc.(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("%+v is not a map", enc)
+		return fmt.Errorf("unable to decode link fragment : %+v is a %s, not a map", enc, reflect.TypeOf(enc))
 	}
 	if v, found := dec["url"]; found {
 		l.Url = v.(string)
@@ -31,7 +32,7 @@ type DocumentLink struct {
 func (l *DocumentLink) Decode(enc interface{}) error {
 	dec, ok := enc.(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("%+v is not a map", enc)
+		return fmt.Errorf("unable to decode link fragment : %+v is a %s, not a map", enc, reflect.TypeOf(enc))
 	}
 	if v, found := dec["document"]; found {
 		doc, ok := v.(map[string]interface{})

@@ -2,6 +2,7 @@ package fragment
 
 import (
 	"fmt"
+	"reflect"
 )
 
 type ImageView struct {
@@ -17,7 +18,7 @@ type ImageView struct {
 func (i *ImageView) Decode(enc interface{}) error {
 	dec, ok := enc.(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("%+v is not a map", enc)
+		return fmt.Errorf("unable to decode image view : %+v is a %s, not a map", enc, reflect.TypeOf(enc))
 	}
 	if v, found := dec["url"]; found {
 		i.Url = v.(string)
@@ -69,7 +70,7 @@ func (i *Image) Decode(enc interface{}) error {
 	if v, found := dec["views"]; found {
 		views, ok := v.(map[string]interface{})
 		if !ok {
-			return fmt.Errorf("%+v is not a map", v)
+			return fmt.Errorf("unable to decode image fragment : %+v is a %s, not a map", enc, reflect.TypeOf(enc))
 		}
 		i.Views = make(map[string]ImageView)
 		for k, view := range views {

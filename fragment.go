@@ -3,6 +3,7 @@ package goprismic
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/SoCloz/goprismic/fragment"
 )
@@ -58,7 +59,7 @@ func (fs *FragmentList) UnmarshalJSON(data []byte) error {
 		}
 		err := n.Decode(v.Value)
 		if err != nil {
-			//log.Errorf("goprismic: unable to decode fragment : %s\n", err)
+			log.Printf("goprismic: unable to decode fragment : %s\n", err)
 			return err
 		}
 		//fmt.Printf("\n%s => %+v\n", v.Type, n)
