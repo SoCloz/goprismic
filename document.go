@@ -1,6 +1,8 @@
 package goprismic
 
 import (
+	"time"
+
 	"github.com/SoCloz/goprismic/fragment"
 )
 
@@ -17,6 +19,16 @@ type Document struct {
 // Returns the document slug
 func (d *Document) GetSlug() string {
 	return d.Slugs[0]
+}
+
+// Tests if the document has a slug
+func (d *Document) HasSlug(slug string) bool {
+	for _, v := range d.Slugs {
+		if v == slug {
+			return true
+		}
+	}
+	return false
 }
 
 // Returns the list of fragments of a certain name
@@ -44,7 +56,7 @@ func (d *Document) GetFragment(field string) (FragmentInterface, bool) {
 }
 
 // Returns an image fragment (the first found)
-func (d *Document) GetImage(field string) (*fragment.Image, bool) {
+func (d *Document) GetImageFragment(field string) (*fragment.Image, bool) {
 	f, found := d.GetFragment(field)
 	if !found {
 		return nil, false
@@ -57,7 +69,7 @@ func (d *Document) GetImage(field string) (*fragment.Image, bool) {
 }
 
 // Returns s structured text fragment (the first found)
-func (d *Document) GetStructuredText(field string) (*fragment.StructuredText, bool) {
+func (d *Document) GetStructuredTextFragment(field string) (*fragment.StructuredText, bool) {
 	f, found := d.GetFragment(field)
 	if !found {
 		return nil, false
@@ -70,46 +82,101 @@ func (d *Document) GetStructuredText(field string) (*fragment.StructuredText, bo
 }
 
 // Returns a color fragment (the first found)
-func (d *Document) GetColor(field string) (*fragment.Color, bool) {
+func (d *Document) GetColorFragment(field string) (*fragment.Color, bool) {
 	f, found := d.GetFragment(field)
 	if !found {
 		return nil, false
 	}
-	st, ok := f.(*fragment.Color)
+	c, ok := f.(*fragment.Color)
 	if !ok {
-		return nil, false
+		return  nil, false
 	}
-	return st, true
+	return c, true
+}
+
+// Returns a color value (the first found)
+func (d *Document) GetColor(field string) (string, bool) {
+	c, found := d.GetColorFragment(field)
+	if !found {
+		return "", false
+	}
+	return string(*c), true
 }
 
 // Returns a number fragment (the first found)
-func (d *Document) GetNumber(field string) (*fragment.Number, bool) {
+func (d *Document) GetNumberFragment(field string) (*fragment.Number, bool) {
 	f, found := d.GetFragment(field)
 	if !found {
 		return nil, false
 	}
-	st, ok := f.(*fragment.Number)
+	n, ok := f.(*fragment.Number)
 	if !ok {
 		return nil, false
 	}
-	return st, true
+	return n, true
+}
+
+// Returns a number value (the first found)
+func (d *Document) GetNumber(field string) (float64, bool) {
+	n, found := d.GetNumberFragment(field)
+	if !found {
+		return float64(0), false
+	}
+	return float64(*n), true
 }
 
 // Returns a text fragment (the first found)
-func (d *Document) GetText(field string) (*fragment.Text, bool) {
+func (d *Document) GetTextFragment(field string) (*fragment.Text, bool) {
 	f, found := d.GetFragment(field)
 	if !found {
 		return nil, false
 	}
-	st, ok := f.(*fragment.Text)
+	t, ok := f.(*fragment.Text)
 	if !ok {
 		return nil, false
 	}
-	return st, true
+	return t, true
+}
+
+// Returns a text value (the first found)
+func (d *Document) GetText(field string) (string, bool) {
+	f, found := d.GetFragment(field)
+	if !found {
+		return "", false
+	}
+	return f.AsText(), true
+}
+
+// Returns the boolean representation of a fragment (the first found)
+func (d *Document) GetBool(field string) (bool, bool) {
+	t, found := d.GetText(field)
+	return (t == "yes" || t == "true"), found
+}
+
+// Returns a date fragment (the first found)
+func (d *Document) GetDateFragment(field string) (*fragment.Date, bool) {
+	f, found := d.GetFragment(field)
+	if !found {
+		return nil, false
+	}
+	t, ok := f.(*fragment.Date)
+	if !ok {
+		return nil, false
+	}
+	return t, true
+}
+
+// Returns a date value (the first found)
+func (d *Document) GetDate(field string) (time.Time, bool) {
+	t, found := d.GetDateFragment(field)
+	if !found {
+		return time.Time{}, false
+	}
+	return time.Time(*t), true
 }
 
 // Returns a document link fragment (the first found)
-func (d *Document) GetDocumentLink(field string) (*fragment.DocumentLink, bool) {
+func (d *Document) GetDocumentLinkFragment(field string) (*fragment.DocumentLink, bool) {
 	f, found := d.GetFragment(field)
 	if !found {
 		return nil, false
@@ -122,7 +189,7 @@ func (d *Document) GetDocumentLink(field string) (*fragment.DocumentLink, bool) 
 }
 
 // Returns a web link fragment (the first found)
-func (d *Document) GetWebLink(field string) (*fragment.WebLink, bool) {
+func (d *Document) GetWebLinkFragment(field string) (*fragment.WebLink, bool) {
 	f, found := d.GetFragment(field)
 	if !found {
 		return nil, false
