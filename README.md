@@ -30,6 +30,11 @@ if found {
 }
 ```
 
+Documentation
+-------------
+
+See http://godoc.org/github.com/SoCloz/goprismic
+
 License
 -------
 
