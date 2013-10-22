@@ -2,6 +2,7 @@ package block
 
 import (
 	"fmt"
+	"html"
 
 	"github.com/SoCloz/goprismic/fragment/span"
 )
@@ -17,12 +18,12 @@ func (b *BaseBlock) AsText() string {
 }
 
 func (b *BaseBlock) FormatHtmlText() string {
+	t := html.EscapeString(b.Text)
 	// store one more to be able to compute offsets[len(text)]
-	offsets := make([]int, len(b.Text)+1)
+	offsets := make([]int, len(t)+1)
 	for k := range offsets {
 		offsets[k] = k
 	}
-	t := b.Text
 	for _, s := range b.Spans {
 		begin := s.HtmlBeginTag()
 		end := s.HtmlEndTag()
