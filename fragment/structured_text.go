@@ -70,3 +70,14 @@ func (st StructuredText) AsHtml() string {
 	}
 	return html
 }
+
+func (st StructuredText) AsText() string {
+	text := ""
+	for _, v := range st {
+		if text != "" {
+			text += "\n"
+		}
+		text += v.AsText()
+	}
+	return text
+}

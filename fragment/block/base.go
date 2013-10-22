@@ -12,6 +12,10 @@ type BaseBlock struct {
 	Spans []span.SpanInterface `json:"spans"`
 }
 
+func (b *BaseBlock) AsText() string {
+	return b.Text
+}
+
 func (b *BaseBlock) FormatHtmlText() string {
 	// store one more to be able to compute offsets[len(text)]
 	offsets := make([]int, len(b.Text)+1)
