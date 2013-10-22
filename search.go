@@ -52,6 +52,25 @@ func (s *SearchForm) Query(query string) *SearchForm {
 	return s
 }
 
+// Adds form data
+func (s *SearchForm) Data(data map[string]string) *SearchForm {
+	if s.err != nil {
+		return s
+	}
+	if s.form == nil {
+		s.err = fmt.Errorf("no form set !")
+		return s
+	}
+	for k, v := range data {
+		if _, found := s.form.Fields[k]; !found {
+			s.err = fmt.Errorf("field %s not found in form %s !", k, s.form.Name)
+			return s
+		}
+		s.data[k] = v
+	}
+	return s
+}
+
 // Searches the repository
 func (s *SearchForm) Submit() ([]Document, error) {
 	docs := make([]Document, 0, 1024)
