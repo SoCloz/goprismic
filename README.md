@@ -5,11 +5,9 @@ goprismic
 
 Prismic.io client kit for Go
 
-This client has not (yet) been field tested - use at your own risk.
+This client is still a work in progress, but should be stable - use at your own risk.
 
-TODO :
-
-* links
+Links are currently not implemented (yet).
 
 Usage
 -----
