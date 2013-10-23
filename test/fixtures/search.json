@@ -109,45 +109,12 @@
                                     }
                                 }
                             ]
-                        },
-                        {
-                            "type": "o-list-item",
-                            "text": "qsdqdsqsd",
-                            "spans": [ ]
-                        },
-                        {
-                            "type": "o-list-item",
-                            "text": "sqdqsd",
-                            "spans": [ ]
-                        },
-                        {
-                            "type": "o-list-item",
-                            "text": "qsdqsd",
-                            "spans": [ ]
-                        },
-                        {
-                            "type": "list-item",
-                            "text": "qsdqsd",
-                            "spans": [ ]
-                        },
-                        {
-                            "type": "list-item",
-                            "text": "qsdqsdqqdq",
-                            "spans": [ ]
-                        },
-                        {
-                            "type": "list-item",
-                            "text": "qsd",
-                            "spans": [ ]
-                        },
-                        {
-                            "type": "image",
-                            "url": "https://prismicio.s3.amazonaws.com/lesbonneschoses/899162db70c73f11b227932b95ce862c63b9df22.jpg",
-                            "dimensions": {
-                                "width": 900,
-                                "height": 600
-                            }
-                        },
+                        }
+                    ]
+                },
+                "embedimage": {
+                    "type": "StructuredText",
+                    "value": [
                         {
                             "type": "image",
                             "url": "https://wroomdev.s3.amazonaws.com/lesbonneschoses/899162db70c73f11b227932b95ce862c63b9df2A.jpg",
@@ -174,10 +141,40 @@
                                 "type": "video",
                                 "embed_url": "http://www.youtube.com/watch?v=MmIKLlRE7n0"
                             }
+                        }
+                    ]
+                },
+                "list": {
+                    "type": "StructuredText",
+                    "value": [
+                        {
+                            "type": "o-list-item",
+                            "text": "ol1",
+                            "spans": [ ]
                         },
                         {
-                            "type": "paragraph",
-                            "text": "",
+                            "type": "o-list-item",
+                            "text": "ol2",
+                            "spans": [ ]
+                        },
+                        {
+                            "type": "o-list-item",
+                            "text": "ol3",
+                            "spans": [ ]
+                        },
+                        {
+                            "type": "list-item",
+                            "text": "l1",
+                            "spans": [ ]
+                        },
+                        {
+                            "type": "list-item",
+                            "text": "l2",
+                            "spans": [ ]
+                        },
+                        {
+                            "type": "list-item",
+                            "text": "l3",
                             "spans": [ ]
                         }
                     ]

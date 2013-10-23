@@ -9,6 +9,10 @@ type ListItem struct {
 	BaseBlock
 }
 
+func (l *ListItem) Decode(enc interface{}) error {
+	return l.decodeBlock(enc)
+}
+
 func (l *ListItem) AsHtml() string {
 	return fmt.Sprintf("<li>%s</li>", l.FormatHtmlText())
 }
@@ -20,6 +24,10 @@ func (l *ListItem) ParentHtmlTag() string {
 // A list block (ordered)
 type OrderedListItem struct {
 	BaseBlock
+}
+
+func (l *OrderedListItem) Decode(enc interface{}) error {
+	return l.decodeBlock(enc)
 }
 
 func (l *OrderedListItem) AsHtml() string {

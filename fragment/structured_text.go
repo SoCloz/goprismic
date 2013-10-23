@@ -31,9 +31,9 @@ func (st *StructuredText) Decode(_ string, enc interface{}) error {
 			b = new(block.Preformatted)
 		case "list-item":
 			b = new(block.ListItem)
-		case "image":
-			b = new(block.OrderedListItem)
 		case "o-list-item":
+			b = new(block.OrderedListItem)
+		case "image":
 			b = new(block.Image)
 		case "embed":
 			b = new(block.Embed)

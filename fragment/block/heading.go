@@ -9,6 +9,10 @@ type Heading struct {
 	BaseBlock
 }
 
+func (h *Heading) Decode(enc interface{}) error {
+	return h.decodeBlock(enc)
+}
+
 func (h *Heading) AsHtml() string {
 	switch h.Type {
 	case "heading1":

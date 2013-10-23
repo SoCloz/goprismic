@@ -144,7 +144,6 @@ func (s *TestSuite) TestLinkFragment(c *gocheck.C) {
 	c.Assert(l.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Has the right rendering"))
 }
 
-
 func (s *TestSuite) TestLinkSpans(c *gocheck.C) {
 	desc, _ := s.doc.GetStructuredTextFragment("description")
 	r := func(l link.Link) string {
@@ -165,4 +164,25 @@ func (s *TestSuite) TestLinkSpans(c *gocheck.C) {
 	p = blocks[4].(*block.Paragraph)
 	content = "<p><a href=\"http://data.prismic.io/lesbonneschoses%2F1378998378075_medium_1374778510922_coconut.png\">link2</a></p>";
 	c.Assert(p.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Link.file has the right rendering"))
+}
+
+func (s *TestSuite) TestEmbedAndImage(c *gocheck.C) {
+	desc, _ := s.doc.GetStructuredTextFragment("embedimage")
+
+	blocks := *desc
+
+	i := blocks[0]
+	content := "<img src=\"https://wroomdev.s3.amazonaws.com/lesbonneschoses/899162db70c73f11b227932b95ce862c63b9df2A.jpg\" width=\"800\" height=\"400\"/>";
+	c.Assert(i.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Image block has the right rendering"))
+
+	e := blocks[1]
+	content = "<div data-oembed=\"http://www.youtube.com/watch?v=MmIKLlRE7n0\" data-oembed-type=\"video\" data-oembed-provider=\"YouTube\"><iframe width='459' height='344' src='http://www.youtube.com/embed/MmIKLlRE7n0?feature=oembed' frameborder='0' allowfullscreen></iframe></div>";
+	c.Assert(e.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Embed block has the right rendering"))
+}
+
+func (s *TestSuite) TestList(c *gocheck.C) {
+	desc, _ := s.doc.GetStructuredTextFragment("list")
+
+	content := "<ol><li>ol1</li><li>ol2</li><li>ol3</li></ol><ul><li>l1</li><li>l2</li><li>l3</li></ul>";
+	c.Assert(desc.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Lists have the right rendering"))
 }

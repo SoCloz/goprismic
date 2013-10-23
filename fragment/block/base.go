@@ -41,7 +41,7 @@ func (b *BaseBlock) FormatHtmlText() string {
 	return t
 }
 
-func (b *BaseBlock) Decode(enc interface{}) error {
+func (b *BaseBlock) decodeBlock(enc interface{}) error {
 	dec, ok := enc.(map[string]interface{})
 	if !ok {
 		return fmt.Errorf("%+v is not a map", enc)
