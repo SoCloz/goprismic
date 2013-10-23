@@ -59,7 +59,7 @@ func (d *Document) GetFragments(field string) (FragmentList, bool) {
 // Returns the nth fragment of a certain name
 func (d *Document) GetFragmentAt(field string, index int) (FragmentInterface, bool) {
 	frags, found := d.GetFragments(field)
-	if !found || len(frags) < index {
+	if !found || len(frags) <= index {
 		return nil, false
 	}
 	return frags[index], true
