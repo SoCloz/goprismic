@@ -7,6 +7,7 @@ import (
 	"github.com/SoCloz/goprismic/fragment/link"
 )
 
+// An image view
 type ImageView struct {
 	Url        string `json:"url"`
 	Alt        string `json:"alt"`
@@ -58,6 +59,7 @@ func (i *ImageView) Ratio() float64 {
 	return float64(i.Dimensions.Width)/float64(i.Dimensions.Height)
 }
 
+// An image, with multiple views
 type Image struct {
 	Main  ImageView            `json:"main"`
 	Views map[string]ImageView `json:"views"`

@@ -7,6 +7,7 @@ import (
 	"github.com/SoCloz/goprismic/fragment/link"
 )
 
+// A structured text fragment is a list of blocks
 type StructuredText []block.Block
 
 func (st *StructuredText) Decode(_ string, enc interface{}) error {

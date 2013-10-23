@@ -32,7 +32,7 @@ func (d *Document) HasSlug(slug string) bool {
 	return false
 }
 
-// Returns the list of fragments of a certain name
+// Resolves links
 func (d *Document) ResolveLinks(r link.Resolver) {
 	frags, found := d.Fragments[d.Type]
 	if !found {

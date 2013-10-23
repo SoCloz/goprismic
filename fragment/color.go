@@ -7,6 +7,7 @@ import (
 	"github.com/SoCloz/goprismic/fragment/link"
 )
 
+// A color fragment (hex color code)
 type Color string
 
 func (c *Color) Decode(_ string, enc interface{}) error {

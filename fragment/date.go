@@ -8,6 +8,7 @@ import (
 	"github.com/SoCloz/goprismic/fragment/link"
 )
 
+// A date fragment (YYYY-MM-DD)
 type Date time.Time
 
 func (d *Date) Decode(_ string, enc interface{}) error {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// A preformatted block
 type Preformatted struct {
 	BaseBlock
 }

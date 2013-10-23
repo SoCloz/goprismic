@@ -7,6 +7,7 @@ import (
 	"github.com/SoCloz/goprismic/fragment/link"
 )
 
+// A number
 type Number float64
 
 func (n *Number) Decode(_ string, enc interface{}) error {

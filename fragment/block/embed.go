@@ -1,5 +1,6 @@
 package block
 
+// A embed block
 type Embed struct {
 	BaseBlock
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/SoCloz/goprismic/fragment/link"
 )
 
+// A embed fragment (see http://oembed.com/)
 type Embed struct {
 	Type  string
 	ProviderName string

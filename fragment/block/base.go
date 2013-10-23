@@ -8,6 +8,7 @@ import (
 	"github.com/SoCloz/goprismic/fragment/span"
 )
 
+// Common block properties
 type BaseBlock struct {
 	Type  string               `json:"type"`
 	Text  string               `json:"text"`
@@ -18,6 +19,7 @@ func (b *BaseBlock) AsText() string {
 	return b.Text
 }
 
+// Formats the block content as html, without enclosing tags
 func (b *BaseBlock) FormatHtmlText() string {
 	t := html.EscapeString(b.Text)
 	// store one more to be able to compute offsets[len(text)]
@@ -81,6 +83,7 @@ func (b *BaseBlock) Decode(enc interface{}) error {
 	return nil
 }
 
+// Resolves links
 func (b *BaseBlock) ResolveLinks(r link.Resolver) {
 	for _, v := range b.Spans {
 		v.ResolveLinks(r)

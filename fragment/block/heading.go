@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// A heading (h1, h2, h3, h4) block
 type Heading struct {
 	BaseBlock
 }

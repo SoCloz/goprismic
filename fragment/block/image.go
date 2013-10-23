@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// An image block
 type Image struct {
 	BaseBlock
 }

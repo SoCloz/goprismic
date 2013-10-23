@@ -7,6 +7,7 @@ import (
 	"github.com/SoCloz/goprismic/fragment/link"
 )
 
+// A text fragment
 type Text string
 
 func (t *Text) Decode(_ string, enc interface{}) error {

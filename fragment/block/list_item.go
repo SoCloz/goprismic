@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// A list block (unordered)
 type ListItem struct {
 	BaseBlock
 }
@@ -16,6 +17,7 @@ func (l *ListItem) ParentHtmlTag() string {
 	return "ul"
 }
 
+// A list block (ordered)
 type OrderedListItem struct {
 	BaseBlock
 }

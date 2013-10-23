@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// A paragraph block
 type Paragraph struct {
 	BaseBlock
 }
