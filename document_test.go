@@ -1,6 +1,6 @@
 package goprismic
 
-import(
+import (
 	"testing"
 	"time"
 
@@ -10,7 +10,6 @@ import(
 	"github.com/SoCloz/goprismic/fragment/link"
 	"github.com/SoCloz/goprismic/test"
 )
-
 
 func Test(t *testing.T) { gocheck.TestingT(t) }
 
@@ -43,7 +42,6 @@ func (s *TestSuite) TestGetColor(c *gocheck.C) {
 	t, _ := s.doc.GetColor("color")
 	c.Assert(t, gocheck.Equals, "#d4bf43", gocheck.Commentf("Found the right text"))
 }
-
 
 func (s *TestSuite) TestGetNumber(c *gocheck.C) {
 	t, _ := s.doc.GetNumber("price")
@@ -90,7 +88,7 @@ func (s *TestSuite) TestGetFirstParagraph(c *gocheck.C) {
 	text, _ := s.doc.GetStructuredTextFragment("description")
 	p, _ := text.GetFirstParagraph()
 	c.Assert(p, gocheck.NotNil, gocheck.Commentf("Has a first paragraph"))
-	content := "If you ever met coconut taste on its bad day, you surely know that coconut, coming from bad-tempered islands, can be rough sometimes. That is why we like to soften it with a touch of caramel taste in its ganache. The result is the perfect encounter between the finest palm fruit and the most tasty of sugarcane's offspring.";
+	content := "If you ever met coconut taste on its bad day, you surely know that coconut, coming from bad-tempered islands, can be rough sometimes. That is why we like to soften it with a touch of caramel taste in its ganache. The result is the perfect encounter between the finest palm fruit and the most tasty of sugarcane's offspring."
 	c.Assert(p.Text, gocheck.Equals, content, gocheck.Commentf("Has the right content"))
 }
 
@@ -98,7 +96,7 @@ func (s *TestSuite) TestGetFirstPreformatted(c *gocheck.C) {
 	text, _ := s.doc.GetStructuredTextFragment("description")
 	p, _ := text.GetFirstPreformatted()
 	c.Assert(p, gocheck.NotNil, gocheck.Commentf("Has a first preformatted"))
-	content := "If you ever met coconut taste on its bad day, you surely know that coconut, coming from bad-tempered islands, can be rough sometimes. That is why we like to soften it with a touch of caramel taste in its ganache. The result is the perfect encounter between the finest palm fruit and the most tasty of sugarcane's offspring.";
+	content := "If you ever met coconut taste on its bad day, you surely know that coconut, coming from bad-tempered islands, can be rough sometimes. That is why we like to soften it with a touch of caramel taste in its ganache. The result is the perfect encounter between the finest palm fruit and the most tasty of sugarcane's offspring."
 	c.Assert(p.Text, gocheck.Equals, content, gocheck.Commentf("Has the right content"))
 }
 
@@ -106,7 +104,7 @@ func (s *TestSuite) TestParagraphRendering(c *gocheck.C) {
 	text, _ := s.doc.GetStructuredTextFragment("render")
 	p, _ := text.GetFirstParagraph()
 	c.Assert(p, gocheck.NotNil, gocheck.Commentf("Has a first paragraph"))
-	content := "<p>This <em>is</em> <strong>a</strong> test.</p>";
+	content := "<p>This <em>is</em> <strong>a</strong> test.</p>"
 	c.Assert(p.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Has the right rendering"))
 }
 
@@ -114,7 +112,7 @@ func (s *TestSuite) TestPreformattedRendering(c *gocheck.C) {
 	text, _ := s.doc.GetStructuredTextFragment("render")
 	p, _ := text.GetFirstPreformatted()
 	c.Assert(p, gocheck.NotNil, gocheck.Commentf("Has a first preformatted"))
-	content := "<pre>This <em>is</em> <strong>a</strong> test.</pre>";
+	content := "<pre>This <em>is</em> <strong>a</strong> test.</pre>"
 	c.Assert(p.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Has the right rendering"))
 }
 
@@ -122,7 +120,7 @@ func (s *TestSuite) TestParagraphEscape(c *gocheck.C) {
 	text, _ := s.doc.GetStructuredTextFragment("escape")
 	p, _ := text.GetFirstParagraph()
 	c.Assert(p, gocheck.NotNil, gocheck.Commentf("Has a first paragraph"))
-	content := "<p>This is &lt;a&gt; test.</p>";
+	content := "<p>This is &lt;a&gt; test.</p>"
 	c.Assert(p.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Has the right rendering"))
 }
 
@@ -130,7 +128,7 @@ func (s *TestSuite) TestPreformattedEscape(c *gocheck.C) {
 	text, _ := s.doc.GetStructuredTextFragment("escape")
 	p, _ := text.GetFirstPreformatted()
 	c.Assert(p, gocheck.NotNil, gocheck.Commentf("Has a first preformatted"))
-	content := "<pre>This is &lt;a&gt; test.</pre>";
+	content := "<pre>This is &lt;a&gt; test.</pre>"
 	c.Assert(p.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Has the right rendering"))
 }
 
@@ -140,7 +138,7 @@ func (s *TestSuite) TestLinkFragment(c *gocheck.C) {
 		return l.(*link.DocumentLink).Document.Slug
 	}
 	l.ResolveLinks(r)
-	content := "<a href=\"vanilla-macaron\">vanilla-macaron</a>";
+	content := "<a href=\"vanilla-macaron\">vanilla-macaron</a>"
 	c.Assert(l.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Has the right rendering"))
 }
 
@@ -154,15 +152,15 @@ func (s *TestSuite) TestLinkSpans(c *gocheck.C) {
 	blocks := *desc
 
 	p := blocks[2].(*block.Paragraph)
-	content := "<p><a href=\"http://apple.com\">link</a></p>";
+	content := "<p><a href=\"http://apple.com\">link</a></p>"
 	c.Assert(p.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Link.web has the right rendering"))
 
 	p = blocks[3].(*block.Paragraph)
-	content = "<p><a href=\"apricot-pie\">link1</a></p>";
+	content = "<p><a href=\"apricot-pie\">link1</a></p>"
 	c.Assert(p.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Link.document has the right rendering"))
 
 	p = blocks[4].(*block.Paragraph)
-	content = "<p><a href=\"http://data.prismic.io/lesbonneschoses%2F1378998378075_medium_1374778510922_coconut.png\">link2</a></p>";
+	content = "<p><a href=\"http://data.prismic.io/lesbonneschoses%2F1378998378075_medium_1374778510922_coconut.png\">link2</a></p>"
 	c.Assert(p.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Link.file has the right rendering"))
 }
 
@@ -172,17 +170,17 @@ func (s *TestSuite) TestEmbedAndImage(c *gocheck.C) {
 	blocks := *desc
 
 	i := blocks[0]
-	content := "<img src=\"https://wroomdev.s3.amazonaws.com/lesbonneschoses/899162db70c73f11b227932b95ce862c63b9df2A.jpg\" width=\"800\" height=\"400\"/>";
+	content := "<img src=\"https://wroomdev.s3.amazonaws.com/lesbonneschoses/899162db70c73f11b227932b95ce862c63b9df2A.jpg\" width=\"800\" height=\"400\"/>"
 	c.Assert(i.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Image block has the right rendering"))
 
 	e := blocks[1]
-	content = "<div data-oembed=\"http://www.youtube.com/watch?v=MmIKLlRE7n0\" data-oembed-type=\"video\" data-oembed-provider=\"YouTube\"><iframe width='459' height='344' src='http://www.youtube.com/embed/MmIKLlRE7n0?feature=oembed' frameborder='0' allowfullscreen></iframe></div>";
+	content = "<div data-oembed=\"http://www.youtube.com/watch?v=MmIKLlRE7n0\" data-oembed-type=\"video\" data-oembed-provider=\"YouTube\"><iframe width='459' height='344' src='http://www.youtube.com/embed/MmIKLlRE7n0?feature=oembed' frameborder='0' allowfullscreen></iframe></div>"
 	c.Assert(e.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Embed block has the right rendering"))
 }
 
 func (s *TestSuite) TestList(c *gocheck.C) {
 	desc, _ := s.doc.GetStructuredTextFragment("list")
 
-	content := "<ol><li>ol1</li><li>ol2</li><li>ol3</li></ol><ul><li>l1</li><li>l2</li><li>l3</li></ul>";
+	content := "<ol><li>ol1</li><li>ol2</li><li>ol3</li></ol><ul><li>l1</li><li>l2</li><li>l3</li></ul>"
 	c.Assert(desc.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Lists have the right rendering"))
 }

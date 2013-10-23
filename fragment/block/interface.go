@@ -1,6 +1,6 @@
 package block
 
-import(
+import (
 	"github.com/SoCloz/goprismic/fragment/link"
 )
 

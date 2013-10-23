@@ -1,6 +1,6 @@
 package embed
 
-import(
+import (
 	"fmt"
 	"reflect"
 	"strings"
@@ -8,12 +8,12 @@ import(
 
 // An embed (see http://oembed.com/)
 type Embed struct {
-	Type  string
+	Type         string
 	ProviderName string
-	EmbedUrl string
-	Width int
-	Height int
-	Html string
+	EmbedUrl     string
+	Width        int
+	Height       int
+	Html         string
 }
 
 func (e *Embed) Decode(enc interface{}) error {
@@ -50,7 +50,7 @@ func (e *Embed) Decode(enc interface{}) error {
 
 func (e *Embed) AsHtml() string {
 	if e.Html != "" {
-		return "<div data-oembed=\""+e.EmbedUrl+"\" data-oembed-type=\""+strings.ToLower(e.Type)+"\" data-oembed-provider=\""+e.ProviderName+"\">"+e.Html+"</div>";
+		return "<div data-oembed=\"" + e.EmbedUrl + "\" data-oembed-type=\"" + strings.ToLower(e.Type) + "\" data-oembed-provider=\"" + e.ProviderName + "\">" + e.Html + "</div>"
 	}
 	return ""
 }

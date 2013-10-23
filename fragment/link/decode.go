@@ -1,6 +1,6 @@
 package link
 
-import(
+import (
 	"fmt"
 )
 

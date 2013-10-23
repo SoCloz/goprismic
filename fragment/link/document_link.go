@@ -12,7 +12,7 @@ type DocumentLink struct {
 		Type string
 		Slug string
 	}
-	Url string
+	Url      string
 	IsBroken bool
 }
 

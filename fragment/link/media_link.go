@@ -8,8 +8,8 @@ import (
 // A link to a file
 type MediaLink struct {
 	File struct {
-		Url   string
-		Kind string
+		Url      string
+		Kind     string
 		Filename string
 	}
 }

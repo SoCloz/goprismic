@@ -1,6 +1,6 @@
 package test
 
-import(
+import (
 	"encoding/json"
 	"io/ioutil"
 	"log"

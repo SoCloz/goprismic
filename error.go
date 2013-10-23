@@ -1,14 +1,14 @@
 package goprismic
 
-import(
+import (
 	"fmt"
 )
 
 type PrismicError struct {
 	Message string `json:"message"`
-	Type string `json:"type"`
-	Line int `json:"line"`
-	Column int `json:"column"`
+	Type    string `json:"type"`
+	Line    int    `json:"line"`
+	Column  int    `json:"column"`
 }
 
 func (e *PrismicError) Error() string {

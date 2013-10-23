@@ -1,11 +1,10 @@
 package goprismic
 
-import(
+import (
 	"testing"
 
 	"launchpad.net/gocheck"
 )
-
 
 func TestApi(t *testing.T) { gocheck.TestingT(t) }
 

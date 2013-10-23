@@ -1,6 +1,6 @@
 package image
 
-import(
+import (
 	"fmt"
 	"reflect"
 )
@@ -54,5 +54,5 @@ func (i *View) AsHtml() string {
 }
 
 func (i *View) Ratio() float64 {
-	return float64(i.Dimensions.Width)/float64(i.Dimensions.Height)
+	return float64(i.Dimensions.Width) / float64(i.Dimensions.Height)
 }

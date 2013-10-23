@@ -29,5 +29,4 @@ func (l *WebLink) GetText() string {
 	return l.Url
 }
 
-
 func (l *WebLink) Resolve(_ Resolver) {}

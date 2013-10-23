@@ -103,7 +103,7 @@ func (d *Document) GetColorFragment(field string) (*fragment.Color, bool) {
 	}
 	c, ok := f.(*fragment.Color)
 	if !ok {
-		return  nil, false
+		return nil, false
 	}
 	return c, true
 }

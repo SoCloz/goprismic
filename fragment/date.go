@@ -31,7 +31,7 @@ func (d *Date) AsText() string {
 
 func (d *Date) AsHtml() string {
 	t := time.Time(*d)
-	return "<time>"+t.Format("2006-01-02")+"</time>"
+	return "<time>" + t.Format("2006-01-02") + "</time>"
 }
 
 func (d *Date) ResolveLinks(_ link.Resolver) {}

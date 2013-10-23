@@ -1,6 +1,6 @@
 package span
 
-import(
+import (
 	"fmt"
 
 	"github.com/SoCloz/goprismic/fragment/link"

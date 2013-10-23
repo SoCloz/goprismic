@@ -5,8 +5,8 @@ import (
 )
 
 type Span struct {
-	Start int                    `json:"start"`
-	End   int                    `json:"end"`
+	Start int `json:"start"`
+	End   int `json:"end"`
 }
 
 func (s *Span) decodeSpan(enc interface{}) error {
