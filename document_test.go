@@ -165,9 +165,7 @@ func (s *TestSuite) TestLinkSpans(c *gocheck.C) {
 }
 
 func (s *TestSuite) TestEmbedAndImage(c *gocheck.C) {
-	desc, _ := s.doc.GetStructuredTextFragment("embedimage")
-
-	blocks := *desc
+	blocks, _ := s.doc.GetStructuredTextBlocks("embedimage")
 
 	i := blocks[0]
 	content := "<img src=\"https://wroomdev.s3.amazonaws.com/lesbonneschoses/899162db70c73f11b227932b95ce862c63b9df2A.jpg\" width=\"800\" height=\"400\"/>"

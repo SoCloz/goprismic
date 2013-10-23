@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/SoCloz/goprismic/fragment"
+	"github.com/SoCloz/goprismic/fragment/block"
 	"github.com/SoCloz/goprismic/fragment/link"
 )
 
@@ -82,7 +83,7 @@ func (d *Document) GetImageFragment(field string) (*fragment.Image, bool) {
 	return i, true
 }
 
-// Returns s structured text fragment (the first found)
+// Returns a structured text fragment (returns the first found)
 func (d *Document) GetStructuredTextFragment(field string) (*fragment.StructuredText, bool) {
 	f, found := d.GetFragment(field)
 	if !found {
@@ -94,6 +95,20 @@ func (d *Document) GetStructuredTextFragment(field string) (*fragment.Structured
 	}
 	return st, true
 }
+
+// Returns the list of blocks of a structured text fragment
+func (d *Document) GetStructuredTextBlocks(field string) ([]block.Block, bool) {
+	f, found := d.GetFragment(field)
+	if !found {
+		return nil, false
+	}
+	st, ok := f.(*fragment.StructuredText)
+	if !ok {
+		return nil, false
+	}
+	return []block.Block(*st), true
+}
+
 
 // Returns a color fragment (the first found)
 func (d *Document) GetColorFragment(field string) (*fragment.Color, bool) {
