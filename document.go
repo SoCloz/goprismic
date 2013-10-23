@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/SoCloz/goprismic/fragment"
+	"github.com/SoCloz/goprismic/fragment/link"
 )
 
 // A document is made of fragments of various types
@@ -29,6 +30,19 @@ func (d *Document) HasSlug(slug string) bool {
 		}
 	}
 	return false
+}
+
+// Returns the list of fragments of a certain name
+func (d *Document) ResolveLinks(r link.Resolver) {
+	frags, found := d.Fragments[d.Type]
+	if !found {
+		return
+	}
+	for _, list := range frags {
+		for k := range list {
+			list[k].ResolveLinks(r)
+		}
+	}
 }
 
 // Returns the list of fragments of a certain name
@@ -175,28 +189,15 @@ func (d *Document) GetDate(field string) (time.Time, bool) {
 	return time.Time(*t), true
 }
 
-// Returns a document link fragment (the first found)
-func (d *Document) GetDocumentLinkFragment(field string) (*fragment.DocumentLink, bool) {
+// Returns a link fragment (the first found)
+func (d *Document) GetLinkFragment(field string) (*fragment.Link, bool) {
 	f, found := d.GetFragment(field)
 	if !found {
 		return nil, false
 	}
-	st, ok := f.(*fragment.DocumentLink)
+	l, ok := f.(*fragment.Link)
 	if !ok {
 		return nil, false
 	}
-	return st, true
-}
-
-// Returns a web link fragment (the first found)
-func (d *Document) GetWebLinkFragment(field string) (*fragment.WebLink, bool) {
-	f, found := d.GetFragment(field)
-	if !found {
-		return nil, false
-	}
-	st, ok := f.(*fragment.WebLink)
-	if !ok {
-		return nil, false
-	}
-	return st, true
+	return l, true
 }

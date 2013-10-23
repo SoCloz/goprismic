@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"reflect"
 	"time"
+
+	"github.com/SoCloz/goprismic/fragment/link"
 )
 
 type Date time.Time
 
-func (d *Date) Decode(enc interface{}) error {
+func (d *Date) Decode(_ string, enc interface{}) error {
 	dec, ok := enc.(string)
 	if !ok {
 		return fmt.Errorf("unable to decode date fragment : %+v is a %s, not a string", enc, reflect.TypeOf(enc))
@@ -30,3 +32,5 @@ func (d *Date) AsHtml() string {
 	t := time.Time(*d)
 	return "<time>"+t.Format("2006-01-02")+"</time>"
 }
+
+func (d *Date) ResolveLinks(_ link.Resolver) {}

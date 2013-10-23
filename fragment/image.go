@@ -3,6 +3,8 @@ package fragment
 import (
 	"fmt"
 	"reflect"
+
+	"github.com/SoCloz/goprismic/fragment/link"
 )
 
 type ImageView struct {
@@ -67,7 +69,7 @@ func (i *Image) GetView(view string) (*ImageView, bool) {
 	return &v, found
 }
 
-func (i *Image) Decode(enc interface{}) error {
+func (i *Image) Decode(_ string, enc interface{}) error {
 	dec, ok := enc.(map[string]interface{})
 	if !ok {
 		return fmt.Errorf("%+v is not a map", enc)
@@ -97,3 +99,5 @@ func (i *Image) AsText() string {
 func (i *Image) AsHtml() string {
 	return i.Main.AsHtml()
 }
+
+func (i *Image) ResolveLinks(_ link.Resolver) {}

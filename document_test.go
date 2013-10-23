@@ -6,6 +6,8 @@ import(
 
 	"launchpad.net/gocheck"
 
+	"github.com/SoCloz/goprismic/fragment/block"
+	"github.com/SoCloz/goprismic/fragment/link"
 	"github.com/SoCloz/goprismic/test"
 )
 
@@ -130,4 +132,37 @@ func (s *TestSuite) TestPreformattedEscape(c *gocheck.C) {
 	c.Assert(p, gocheck.NotNil, gocheck.Commentf("Has a first preformatted"))
 	content := "<pre>This is &lt;a&gt; test.</pre>";
 	c.Assert(p.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Has the right rendering"))
+}
+
+func (s *TestSuite) TestLinkFragment(c *gocheck.C) {
+	l, _ := s.doc.GetLinkFragment("related")
+	r := func(l link.Link) string {
+		return l.(*link.DocumentLink).Document.Slug
+	}
+	l.ResolveLinks(r)
+	content := "<a href=\"vanilla-macaron\">vanilla-macaron</a>";
+	c.Assert(l.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Has the right rendering"))
+}
+
+
+func (s *TestSuite) TestLinkSpans(c *gocheck.C) {
+	desc, _ := s.doc.GetStructuredTextFragment("description")
+	r := func(l link.Link) string {
+		return l.(*link.DocumentLink).Document.Slug
+	}
+	desc.ResolveLinks(r)
+
+	blocks := *desc
+
+	p := blocks[2].(*block.Paragraph)
+	content := "<p><a href=\"http://apple.com\">link</a></p>";
+	c.Assert(p.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Link.web has the right rendering"))
+
+	p = blocks[3].(*block.Paragraph)
+	content = "<p><a href=\"apricot-pie\">link1</a></p>";
+	c.Assert(p.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Link.document has the right rendering"))
+
+	p = blocks[4].(*block.Paragraph)
+	content = "<p><a href=\"http://data.prismic.io/lesbonneschoses%2F1378998378075_medium_1374778510922_coconut.png\">link2</a></p>";
+	c.Assert(p.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Link.file has the right rendering"))
 }

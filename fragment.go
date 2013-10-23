@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/SoCloz/goprismic/fragment"
+	"github.com/SoCloz/goprismic/fragment/link"
 )
 
 type FragmentTree map[string]Fragments
@@ -19,9 +20,10 @@ type FragmentEnvelope struct {
 }
 
 type FragmentInterface interface {
-	Decode(interface{}) error
+	Decode(string, interface{}) error
 	AsText() string
 	AsHtml() string
+	ResolveLinks(link.Resolver)
 }
 
 func (fs *FragmentList) UnmarshalJSON(data []byte) error {
@@ -53,9 +55,11 @@ func (fs *FragmentList) UnmarshalJSON(data []byte) error {
 		case "Text":
 			n = new(fragment.Text)
 		case "Link.web":
-			n = new(fragment.WebLink)
+			n = new(fragment.Link)
 		case "Link.document":
-			n = new(fragment.DocumentLink)
+			n = new(fragment.Link)
+		case "Link.media":
+			n = new(fragment.Link)
 		case "Embed":
 			n = new(fragment.Embed)
 		case "Select":
@@ -63,7 +67,7 @@ func (fs *FragmentList) UnmarshalJSON(data []byte) error {
 		default:
 			return fmt.Errorf("Unknown fragment type %s", v.Type)
 		}
-		err := n.Decode(v.Value)
+		err := n.Decode(v.Type, v.Value)
 		if err != nil {
 			log.Printf("goprismic: unable to decode fragment : %s\n", err)
 			return err

@@ -5,9 +5,7 @@ goprismic
 
 Prismic.io client kit for Go
 
-This client is still a work in progress, but should be stable - use at your own risk.
-
-Links are currently not implemented (yet).
+This client should be feature complete and stable - use at your own risk.
 
 Usage
 -----
@@ -28,6 +26,27 @@ st, found := doc.GetStructuredText("content")
 if found {
 	fmt.Println(st.AsHtml())
 }
+```
+
+Links
+-----
+
+You have to resolve document links using a user-supplied link resolver :
+
+```go
+r := func(l link.Link) string {
+	return l.(*link.DocumentLink).Document.Slug
+}
+```
+and resolve links at document/fragment/block level :
+```go
+doc.ResolveLinks(r)
+
+st, _ := doc.GetStructuredText("content")
+st.ResolveLinks(r)
+
+p, _ := doc.GetFirstParagraph()
+p.ResolveLinks(r)
 ```
 
 Documentation

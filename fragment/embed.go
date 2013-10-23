@@ -3,6 +3,8 @@ package fragment
 import (
 	"fmt"
 	"reflect"
+
+	"github.com/SoCloz/goprismic/fragment/link"
 )
 
 type Embed struct {
@@ -14,7 +16,7 @@ type Embed struct {
 	Html string
 }
 
-func (e *Embed) Decode(enc interface{}) error {
+func (e *Embed) Decode(_ string, enc interface{}) error {
 	dec, ok := enc.(map[string]interface{})
 	if !ok {
 		return fmt.Errorf("unable to decode embed fragment : %+v is a %s, not a map", enc, reflect.TypeOf(enc))
@@ -56,3 +58,5 @@ func (e *Embed) AsHtml() string {
 	}
 	return ""
 }
+
+func (e *Embed) ResolveLinks(_ link.Resolver) {}

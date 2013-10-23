@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html"
 
+	"github.com/SoCloz/goprismic/fragment/link"
 	"github.com/SoCloz/goprismic/fragment/span"
 )
 
@@ -69,10 +70,19 @@ func (b *BaseBlock) Decode(enc interface{}) error {
 				default:
 					panic(fmt.Sprintf("Unknown span type %s", dec3["type"]))
 				}
-				s.Decode(v)
+				err := s.Decode(v)
+				if err != nil {
+					return err
+				}
 				b.Spans = append(b.Spans, s)
 			}
 		}
 	}
 	return nil
+}
+
+func (b *BaseBlock) ResolveLinks(r link.Resolver) {
+	for _, v := range b.Spans {
+		v.ResolveLinks(r)
+	}
 }

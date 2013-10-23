@@ -2,71 +2,29 @@ package fragment
 
 import (
 	"fmt"
-	"reflect"
+
+	"github.com/SoCloz/goprismic/fragment/link"
 )
 
-type WebLink struct {
-	Url string
+// A link fragment
+type Link struct {
+	Link link.Link
 }
 
-func (l *WebLink) Decode(enc interface{}) error {
-	dec, ok := enc.(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("unable to decode link fragment : %+v is a %s, not a map", enc, reflect.TypeOf(enc))
-	}
-	if v, found := dec["url"]; found {
-		l.Url = v.(string)
-	}
-	return nil
+func (l *Link) Decode(t string, enc interface{}) error {
+	var err error
+	l.Link, err = link.Decode(t, enc)
+	return err
 }
 
-func (l *WebLink) AsText() string {
-	return l.Url
+func (l *Link) AsText() string {
+	return l.Link.GetUrl()
 }
 
-func (l *WebLink) AsHtml() string {
-	return l.Url
+func (l *Link) AsHtml() string {
+	return fmt.Sprintf("<a href=\"%s\">%s</a>", l.Link.GetUrl(), l.Link.GetText())
 }
 
-type DocumentLink struct {
-	Document struct {
-		Id   string
-		Type string
-		Slug string
-	}
-	IsBroken bool
-}
-
-func (l *DocumentLink) Decode(enc interface{}) error {
-	dec, ok := enc.(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("unable to decode link fragment : %+v is a %s, not a map", enc, reflect.TypeOf(enc))
-	}
-	if v, found := dec["document"]; found {
-		doc, ok := v.(map[string]interface{})
-		if !ok {
-			return fmt.Errorf("%+v is not a map", v)
-		}
-		if v, found := doc["id"]; found {
-			l.Document.Id = v.(string)
-		}
-		if v, found := doc["type"]; found {
-			l.Document.Type = v.(string)
-		}
-		if v, found := doc["slug"]; found {
-			l.Document.Slug = v.(string)
-		}
-	}
-	if v, found := dec["isBroken"]; found {
-		l.IsBroken = v.(bool)
-	}
-	return nil
-}
-
-func (l *DocumentLink) AsText() string {
-	return ""
-}
-
-func (l *DocumentLink) AsHtml() string {
-	return ""
+func (l *Link) ResolveLinks(r link.Resolver) {
+	l.Link.Resolve(r)
 }

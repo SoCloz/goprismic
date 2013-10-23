@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/SoCloz/goprismic/fragment/block"
+	"github.com/SoCloz/goprismic/fragment/link"
 )
 
 type StructuredText []block.Block
 
-func (st *StructuredText) Decode(enc interface{}) error {
+func (st *StructuredText) Decode(_ string, enc interface{}) error {
 	dec, ok := enc.([]interface{})
 	if !ok {
 		return fmt.Errorf("%+v is not a slice", enc)
@@ -112,4 +113,10 @@ func (st StructuredText) GetFirstImage() (*block.Image, bool) {
 		}
 	}
 	return nil, false
+}
+
+func (st StructuredText) ResolveLinks(r link.Resolver) {
+	for _, v := range st {
+		v.ResolveLinks(r)
+	}
 }
