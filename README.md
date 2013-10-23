@@ -5,7 +5,7 @@ goprismic
 
 Prismic.io client kit for Go
 
-This client should be feature complete and stable - use at your own risk.
+This client should be feature complete and stable - however use it at your own risk.
 
 Usage
 -----
@@ -22,7 +22,7 @@ if len(docs) == 0 {
 }
 doc := docs[0]
 
-st, found := doc.GetStructuredText("content")
+st, found := doc.GetStructuredTextFragment("content")
 if found {
 	fmt.Println(st.AsHtml())
 }
@@ -42,10 +42,10 @@ and resolve links at document/fragment/block level :
 ```go
 doc.ResolveLinks(r)
 
-st, _ := doc.GetStructuredText("content")
+st, _ := doc.GetStructuredTextFragment("content")
 st.ResolveLinks(r)
 
-p, _ := doc.GetFirstParagraph()
+p, _ := st.GetFirstParagraph()
 p.ResolveLinks(r)
 ```
 
