@@ -63,9 +63,13 @@ func (a *Api) call(u string, data map[string]string, res interface{}) error {
 	if errparse != nil {
 		return errparse
 	}
+
 	values := callurl.Query()
 	for k, v := range data {
-		values.Add(k, v)
+		values.Set(k, v)
+	}
+	if a.AccessToken != "" {
+		values.Set("access_token", a.AccessToken)
 	}
 	callurl.RawQuery = values.Encode()
 
