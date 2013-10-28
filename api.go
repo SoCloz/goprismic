@@ -32,6 +32,11 @@ func Get(u, accessToken string) (*Api, error) {
 	return api, err
 }
 
+// Refreshes the Api data
+func (a *Api) Refresh() error{
+	return a.call(a.URL, map[string]string{}, &a.Data)
+}
+
 // Fetches the master ref
 func (a *Api) Master() *SearchForm {
 	for _, r := range a.Data.Refs {
