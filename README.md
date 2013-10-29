@@ -72,7 +72,7 @@ doc, err := proxy.GetDocumentBy("product", "fieldname", "fieldvalue")
 Documentation
 -------------
 
-See http://godoc.org/github.com/SoCloz/goprismic
+See http://godoc.org/github.com/SoCloz/goprismic for the api documentation and http://godoc.org/github.com/SoCloz/goprismic/proxy for the proxy documentation.
 
 License
 -------
