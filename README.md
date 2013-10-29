@@ -55,7 +55,8 @@ Proxy
 A simple caching proxy is included. Only single document accesses are cached.
 
 ```go
-// Doc will be cached up to 1 hour, and will be asynchronously refreshed if accessed 10 minutes before expiration (or later).
+// Documents will be cached up to 1 hour, and will be asynchronously refreshed
+// if accessed 10 minutes before expiration (or later).
 proxy, err := proxy.New("https://myrepo.prismic.io/api", "repo key", 1*time.Hour, 10*time.Minute)
 
 // Not cached
