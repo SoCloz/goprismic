@@ -49,6 +49,25 @@ p, _ := st.GetFirstParagraph()
 p.ResolveLinks(r)
 ```
 
+Proxy
+-----
+
+A simple caching proxy is included. Only single document accesses are cached.
+
+```go
+proxy, err := proxy.New("https://myrepo.prismic.io/api", "repo key", 1*time.Hour, 10*time.Minute)
+
+docs, err := proxy.Direct().Master().Form("everything").Submit()
+
+...
+
+doc, err := proxy.GetDocument(id)
+
+...
+
+doc, err := proxy.GetDocumentBy("product", "fieldname", "fieldvalue")
+```
+
 Documentation
 -------------
 
