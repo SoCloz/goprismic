@@ -38,7 +38,6 @@ func (s *Hyperlink) Decode(enc interface{}) error {
 		err = fmt.Errorf("No link value found in %+v", enc)
 	}
 	s.Link, err = link.Decode(t.(string), l)
-	fmt.Println("%s / %+v => %+v", t.(string), v, s.Link)
 	return err
 }
 
