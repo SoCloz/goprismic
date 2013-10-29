@@ -1,22 +1,22 @@
 package proxy
 
-import(
+import (
 	"container/list"
 	"sync"
 	"time"
 )
 
 type Stats struct {
-	Hit int
-	Miss int
+	Hit     int
+	Miss    int
 	Refresh int
 }
 
 // A cache Entry
 type CacheEntry struct {
-	key string
-	entry interface{}
-	validUntil time.Time
+	key          string
+	entry        interface{}
+	validUntil   time.Time
 	refreshAfter time.Time
 }
 
@@ -24,11 +24,11 @@ type CacheEntry struct {
 type Cache struct {
 	sync.Mutex
 	entries map[string]*list.Element
-	lru  *list.List
-	size int
-	ttl time.Duration
-	grace time.Duration
-	Stats Stats
+	lru     *list.List
+	size    int
+	ttl     time.Duration
+	grace   time.Duration
+	Stats   Stats
 }
 
 type RefreshFn func() (interface{}, error)
@@ -72,7 +72,7 @@ func (c *Cache) Get(key string, refresh RefreshFn) (interface{}, error) {
 	var err error
 	if !found || needRefresh {
 		if valid {
-			e.refreshAfter = now.Add(time.Duration(1)*time.Second)
+			e.refreshAfter = now.Add(time.Duration(1) * time.Second)
 			go c.refresh(e, refresh)
 		} else if !found {
 			e = &CacheEntry{}

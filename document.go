@@ -109,7 +109,6 @@ func (d *Document) GetStructuredTextBlocks(field string) ([]block.Block, bool) {
 	return []block.Block(*st), true
 }
 
-
 // Returns a color fragment (the first found)
 func (d *Document) GetColorFragment(field string) (*fragment.Color, bool) {
 	f, found := d.GetFragment(field)

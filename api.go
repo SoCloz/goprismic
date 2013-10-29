@@ -33,7 +33,7 @@ func Get(u, accessToken string) (*Api, error) {
 }
 
 // Refreshes the Api data
-func (a *Api) Refresh() error{
+func (a *Api) Refresh() error {
 	return a.call(a.URL, map[string]string{}, &a.Data)
 }
 

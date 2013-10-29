@@ -13,7 +13,7 @@ func TestProxy(t *testing.T) { gocheck.TestingT(t) }
 
 type ProxyTestSuite struct {
 	proxy *Proxy
-	docs []goprismic.Document
+	docs  []goprismic.Document
 }
 
 var _ = gocheck.Suite(&ProxyTestSuite{})
@@ -54,15 +54,15 @@ func (s *ProxyTestSuite) TestGetBy(c *gocheck.C) {
 func (s *ProxyTestSuite) TestTtlAndGrace(c *gocheck.C) {
 	d := s.docs[0]
 	s.proxy.GetDocument(d.Id)
-	c.Assert(s.proxy.GetStats(), gocheck.DeepEquals, Stats{Miss:1}, gocheck.Commentf("miss"))
+	c.Assert(s.proxy.GetStats(), gocheck.DeepEquals, Stats{Miss: 1}, gocheck.Commentf("miss"))
 	s.proxy.GetDocument(d.Id)
-	c.Assert(s.proxy.GetStats(), gocheck.DeepEquals, Stats{Hit:1,Miss:1}, gocheck.Commentf("miss+hit"))
+	c.Assert(s.proxy.GetStats(), gocheck.DeepEquals, Stats{Hit: 1, Miss: 1}, gocheck.Commentf("miss+hit"))
 
-	time.Sleep(5*time.Second)
+	time.Sleep(5 * time.Second)
 	s.proxy.GetDocument(d.Id)
-	c.Assert(s.proxy.GetStats(), gocheck.DeepEquals, Stats{Hit:2,Miss:1,Refresh:1}, gocheck.Commentf("miss+hit+refresh"))
+	c.Assert(s.proxy.GetStats(), gocheck.DeepEquals, Stats{Hit: 2, Miss: 1, Refresh: 1}, gocheck.Commentf("miss+hit+refresh"))
 
-	time.Sleep(12*time.Second) // Add some delay to allow for async refresh to finish
+	time.Sleep(12 * time.Second) // Add some delay to allow for async refresh to finish
 	s.proxy.GetDocument(d.Id)
-	c.Assert(s.proxy.GetStats(), gocheck.DeepEquals, Stats{Hit:2,Miss:2,Refresh:1}, gocheck.Commentf("miss+hit+refresh+miss"))
+	c.Assert(s.proxy.GetStats(), gocheck.DeepEquals, Stats{Hit: 2, Miss: 2, Refresh: 1}, gocheck.Commentf("miss+hit+refresh+miss"))
 }

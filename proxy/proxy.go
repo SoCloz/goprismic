@@ -1,6 +1,6 @@
 package proxy
 
-import(
+import (
 	"fmt"
 	"time"
 
@@ -9,7 +9,7 @@ import(
 
 type Proxy struct {
 	cache *Cache
-	api *goprismic.Api
+	api   *goprismic.Api
 }
 
 // Creates a proxy
