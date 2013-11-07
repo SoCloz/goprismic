@@ -32,7 +32,7 @@ func (p *Proxy) GetStats() Stats {
 
 // Queries the API
 //
-//   proxi.Direct().Master().Form("everything").Submit()
+//   proxy.Direct().Master().Form("everything").Submit()
 func (p *Proxy) Direct() *goprismic.Api {
 	return p.api
 }
