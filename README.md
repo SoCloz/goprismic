@@ -5,7 +5,7 @@ goprismic
 
 Prismic.io client kit for Go
 
-This client should be feature complete and stable - however use it at your own risk.
+This client should be feature complete and stable. It is currently used in production on http://www.socloz.fr.
 
 Usage
 -----
@@ -69,10 +69,12 @@ doc, err := proxy.GetDocument(id)
 doc, err := proxy.GetDocumentBy("product", "fieldname", "fieldvalue")
 ```
 
-Documentation
--------------
+Documentation & links
+---------------------
 
 See http://godoc.org/github.com/SoCloz/goprismic for the api documentation and http://godoc.org/github.com/SoCloz/goprismic/proxy for the proxy documentation.
+
+Blog post : http://techblog.socloz.com/2013/11/introducing-goprismic-a-prismic-io-go-client-kit/
 
 License
 -------
