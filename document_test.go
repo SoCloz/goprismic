@@ -132,6 +132,22 @@ func (s *TestSuite) TestPreformattedEscape(c *gocheck.C) {
 	c.Assert(p.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Has the right rendering"))
 }
 
+func (s *TestSuite) TestParagraphEscapeAndSpan(c *gocheck.C) {
+	text, _ := s.doc.GetStructuredTextFragment("escapespan")
+	p, _ := text.GetFirstParagraph()
+	c.Assert(p, gocheck.NotNil, gocheck.Commentf("Has a first paragraph"))
+	content := "<p>Thi&amp; i&amp; &lt;a&gt; <em>test</em>.</p>"
+	c.Assert(p.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Has the right rendering"))
+}
+
+func (s *TestSuite) TestParagraphUtf8Span(c *gocheck.C) {
+	text, _ := s.doc.GetStructuredTextFragment("utf8span")
+	p, _ := text.GetFirstParagraph()
+	c.Assert(p, gocheck.NotNil, gocheck.Commentf("Has a first paragraph"))
+	content := "<p>Thìs ìs &lt;à&gt; <em>tést</em>.</p>"
+	c.Assert(p.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Has the right rendering"))
+}
+
 func (s *TestSuite) TestLinkFragment(c *gocheck.C) {
 	l, _ := s.doc.GetLinkFragment("related")
 	r := func(l link.Link) string {

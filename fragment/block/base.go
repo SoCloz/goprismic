@@ -23,10 +23,16 @@ func (b *BaseBlock) AsText() string {
 func (b *BaseBlock) FormatHtmlText() string {
 	t := html.EscapeString(b.Text)
 	// store one more to be able to compute offsets[len(text)]
-	offsets := make([]int, len(t)+1)
-	for k := range offsets {
-		offsets[k] = k
+	offsets := make([]int, len(b.Text)+1)
+	// compute byte offsets for utf8 string
+	off := 0
+	index := 0
+	for k, r := range b.Text {
+		offsets[index] = k+off
+		off += len([]rune(html.EscapeString(string([]rune{r}))))-1
+		index++
 	}
+	offsets[index] = len(b.Text)+off
 	for _, s := range b.Spans {
 		begin := s.HtmlBeginTag()
 		end := s.HtmlEndTag()

@@ -231,6 +231,54 @@
                         }
                     ]
                 },
+                "escapespan": {
+                    "type": "StructuredText",
+                    "value": [
+                        {
+                            "type": "paragraph",
+                            "text": "Thi& i& <a> test.",
+                            "spans": [
+                                {
+                                    "type": "em",
+                                    "start": 12,
+                                    "end": 16
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "utf8span": {
+                    "type": "StructuredText",
+                    "value": [
+                        {
+                            "type": "paragraph",
+                            "text": "Thìs ìs <à> tést.",
+                            "spans": [
+                                {
+                                    "type": "em",
+                                    "start": 12,
+                                    "end": 16
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "offsetminmax": {
+                    "type": "StructuredText",
+                    "value": [
+                        {
+                            "type": "paragraph",
+                            "text": "This",
+                            "spans": [
+                                {
+                                    "type": "em",
+                                    "start": 0,
+                                    "end": 4
+                                }
+                            ]
+                        }
+                    ]
+                },
                 "allergens": {
                     "type": "Text",
                     "value": "Fruit"
