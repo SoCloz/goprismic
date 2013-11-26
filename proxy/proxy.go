@@ -44,10 +44,10 @@ func (p *Proxy) GetDocument(id string) (*goprismic.Document, error) {
 	return d, err
 }
 
-// Fetched a document by a field value
-func (p *Proxy) GetDocumentBy(form, field, value interface{}) (*goprismic.Document, error) {
-	key := fmt.Sprintf("by++%s++%s++%s", form, field, value)
-	query := fmt.Sprintf("[[:d = at(my.%s.%s, \"%v\")]]", form, field, value)
+// Fetches a document of a specific type by a field value
+func (p *Proxy) GetDocumentBy(docType, field string, value interface{}) (*goprismic.Document, error) {
+	key := fmt.Sprintf("by++%s++%s++%s", docType, field, value)
+	query := fmt.Sprintf("[[:d = at(my.%s.%s, \"%v\")][:d = any(document.type, [\"%s\"])]]", docType, field, value, docType)
 	d, err := p.getDoc(key, query)
 	return d, err
 }
