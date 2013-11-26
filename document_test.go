@@ -20,12 +20,13 @@ type TestSuite struct {
 var _ = gocheck.Suite(&TestSuite{})
 
 func (s *TestSuite) SetUpSuite(c *gocheck.C) {
-	docs := []Document{}
-	test.Load("search", &docs)
-	if len(docs) == 0 {
+	sr := SearchResult{}
+	sr.Results = []Document{}
+	test.Load("search", &sr)
+	if len(sr.Results) == 0 {
 		panic("no doc found")
 	}
-	s.doc = &docs[0]
+	s.doc = &sr.Results[0]
 }
 
 func (s *TestSuite) TestSlug(c *gocheck.C) {

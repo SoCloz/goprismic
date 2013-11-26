@@ -1,6 +1,7 @@
 package goprismic
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -10,6 +11,10 @@ type SearchForm struct {
 	form *Form
 	data map[string]string
 	ref  Ref
+}
+
+type SearchResult struct {
+	Results []Document `json:"results"`
 }
 
 // Returns the error
@@ -73,11 +78,15 @@ func (s *SearchForm) Data(data map[string]string) *SearchForm {
 
 // Searches the repository
 func (s *SearchForm) Submit() ([]Document, error) {
-	docs := make([]Document, 0, 1024)
+	sr := SearchResult{}
+	sr.Results = make([]Document, 0, 1024)
 	if s.err != nil {
-		return docs, s.err
+		return sr.Results, s.err
 	}
 	s.data["ref"] = s.ref.Ref
-	err := s.api.call(s.form.Action, s.data, &docs)
-	return docs, err
+	err := s.api.call(s.form.Action, s.data, &sr)
+	if _, ok := err.(*json.UnmarshalTypeError); ok {
+		err = s.api.call(s.form.Action, s.data, &sr.Results)
+	}
+	return sr.Results, err
 }
