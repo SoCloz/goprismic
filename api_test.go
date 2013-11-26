@@ -25,12 +25,14 @@ func (s *ApiTestSuite) TestApi(c *gocheck.C) {
 }
 
 func (s *ApiTestSuite) TestSearch(c *gocheck.C) {
+	c.Assert(s.api, gocheck.NotNil, gocheck.Commentf("Connection with api is OK"))
 	docs, err := s.api.Master().Form("everything").Submit()
 	c.Assert(err, gocheck.IsNil, gocheck.Commentf("Submit did not return an error - %s", err))
 	c.Assert(len(docs), gocheck.Equals, 20, gocheck.Commentf("Submit did return 20 documents"))
 }
 
 func (s *ApiTestSuite) TestQuery(c *gocheck.C) {
+	c.Assert(s.api, gocheck.NotNil, gocheck.Commentf("Connection with api is OK"))
 	docs, err := s.api.Master().Form("everything").Query("[[:d = at(document.tags, [\"Macaron\"])]]").Submit()
 	c.Assert(err, gocheck.IsNil, gocheck.Commentf("Submit did not return an error - %s", err))
 	c.Assert(len(docs), gocheck.Equals, 7, gocheck.Commentf("Submit did return 7 documents"))
@@ -38,6 +40,7 @@ func (s *ApiTestSuite) TestQuery(c *gocheck.C) {
 }
 
 func (s *ApiTestSuite) TestError(c *gocheck.C) {
+	c.Assert(s.api, gocheck.NotNil, gocheck.Commentf("Connection with api is OK"))
 	_, err := s.api.Master().Form("everything").Query("[:d = at(document.tags, [\"Macaron\"])]").Submit()
 	c.Assert(err, gocheck.NotNil, gocheck.Commentf("Submit should return an error"))
 	c.Assert(err.(*PrismicError).Type, gocheck.Equals, "parsing-error", gocheck.Commentf("Submit should return a parse error"))

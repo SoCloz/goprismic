@@ -35,6 +35,7 @@ func (s *ProxyTestSuite) TestProxy(c *gocheck.C) {
 }
 
 func (s *ProxyTestSuite) TestLoadReload(c *gocheck.C) {
+	c.Assert(s.proxy, gocheck.NotNil, gocheck.Commentf("Connection with api is OK"))
 	d := s.docs[0]
 	d1, err := s.proxy.GetDocument(d.Id)
 	c.Assert(err, gocheck.IsNil, gocheck.Commentf("Submit did not return an error - %s", err))
@@ -45,6 +46,7 @@ func (s *ProxyTestSuite) TestLoadReload(c *gocheck.C) {
 }
 
 func (s *ProxyTestSuite) TestGetBy(c *gocheck.C) {
+	c.Assert(s.proxy, gocheck.NotNil, gocheck.Commentf("Connection with api is OK"))
 	d, err := s.proxy.GetDocumentBy("product", "flavour", "Pistachio")
 	c.Assert(d, gocheck.Not(gocheck.IsNil), gocheck.Commentf("Submit did not return an error - %s", err))
 	f, _ := d.GetTextFragment("flavour")
@@ -52,6 +54,7 @@ func (s *ProxyTestSuite) TestGetBy(c *gocheck.C) {
 }
 
 func (s *ProxyTestSuite) TestTtlAndGrace(c *gocheck.C) {
+	c.Assert(s.proxy, gocheck.NotNil, gocheck.Commentf("Connection with api is OK"))
 	d := s.docs[0]
 	s.proxy.GetDocument(d.Id)
 	c.Assert(s.proxy.GetStats(), gocheck.DeepEquals, Stats{Miss: 1}, gocheck.Commentf("miss"))
