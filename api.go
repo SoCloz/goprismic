@@ -29,7 +29,10 @@ func Get(u, accessToken string) (*Api, error) {
 	api := &Api{AccessToken: accessToken, URL: u}
 	api.Data.Refs = make([]Ref, 0, 128)
 	err := api.call(api.URL, map[string]string{}, &api.Data)
-	return api, err
+	if err != nil {
+		return nil, err
+	}
+	return api, nil
 }
 
 // Refreshes the Api data
