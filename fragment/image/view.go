@@ -35,10 +35,10 @@ func (i *View) Decode(enc interface{}) error {
 		if !ok {
 			return fmt.Errorf("%+v is not a map", d)
 		}
-		if v, found := dim["width"]; found {
+		if v, found := dim["width"]; found && v != nil {
 			i.Dimensions.Width = int(v.(float64))
 		}
-		if v, found := dim["height"]; found {
+		if v, found := dim["height"]; found && v != nil {
 			i.Dimensions.Height = int(v.(float64))
 		}
 	}

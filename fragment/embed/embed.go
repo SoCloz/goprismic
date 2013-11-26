@@ -26,22 +26,22 @@ func (e *Embed) Decode(enc interface{}) error {
 		if !ok {
 			return fmt.Errorf("unable to decode embed fragment : %+v is a %s, not a map", enc, reflect.TypeOf(enc))
 		}
-		if v, found := doc["type"]; found {
+		if v, found := doc["type"]; found && v != nil {
 			e.Type = v.(string)
 		}
-		if v, found := doc["provider_name"]; found {
+		if v, found := doc["provider_name"]; found && v != nil {
 			e.ProviderName = v.(string)
 		}
-		if v, found := doc["embed_url"]; found {
+		if v, found := doc["embed_url"]; found && v != nil {
 			e.EmbedUrl = v.(string)
 		}
-		if v, found := doc["width"]; found {
+		if v, found := doc["width"]; found && v != nil {
 			e.Width = int(v.(float64))
 		}
-		if v, found := doc["height"]; found {
+		if v, found := doc["height"]; found && v != nil {
 			e.Height = int(v.(float64))
 		}
-		if v, found := doc["html"]; found {
+		if v, found := doc["html"]; found && v != nil {
 			e.Html = v.(string)
 		}
 	}
