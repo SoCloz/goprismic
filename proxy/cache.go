@@ -85,6 +85,13 @@ func (c *Cache) Get(key string, refresh RefreshFn) (interface{}, error) {
 	return e.entry, err
 }
 
+// Adds something to the cache
+func (c *Cache) Set(key string, v interface{}) {
+	e := &CacheEntry{}
+	c.refresh(e, func() (interface{}, error) { return v, nil })
+	c.add(key, e)
+}
+
 func (c *Cache) refresh(e *CacheEntry, refresh RefreshFn) error {
 	v, err := refresh()
 	if err != nil {

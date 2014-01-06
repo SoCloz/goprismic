@@ -52,8 +52,39 @@ func (p *Proxy) GetDocumentBy(docType, field string, value interface{}) (*gopris
 	return d, err
 }
 
+// Search documents
+func (p *Proxy) Search(docType, q string) ([]goprismic.Document, error) {
+	key := fmt.Sprintf("search++%s++%s", docType, q)
+	query := fmt.Sprintf("[%s[:d = any(document.type, [\"%s\"])]]", q, docType)
+	d, err := p.getDocs(key, query)
+	return d, err
+}
+
 func (p *Proxy) getDoc(key, query string) (*goprismic.Document, error) {
 	d, err := p.cache.Get(key, func() (interface{}, error) {
+		docs, err := p.query(query)
+		if err != nil || len(docs) == 0 {
+			return nil, err
+		}
+		return &docs[0], nil
+	})
+	if d != nil {
+		return d.(*goprismic.Document), nil
+	}
+	return nil, err
+}
+
+func (p *Proxy) getDocs(key, query string) ([]goprismic.Document, error) {
+	d, err := p.cache.Get(key, func() (interface{}, error) {
+		return p.query(query)
+	})
+	if d != nil {
+		return d.([]goprismic.Document), nil
+	}
+	return []goprismic.Document{}, err
+}
+
+func (p *Proxy) query(query string) ([]goprismic.Document, error) {
 		docs, err := p.api.Master().Form("everything").Query(query).Submit()
 		if err != nil {
 			p.api.Refresh()
@@ -65,12 +96,14 @@ func (p *Proxy) getDoc(key, query string) (*goprismic.Document, error) {
 		if len(docs) == 0 {
 			return nil, nil
 		}
-		return &docs[0], nil
-	})
-	if d != nil {
-		return d.(*goprismic.Document), nil
-	}
-	return nil, err
+		for _, d := range docs {
+			p.addToCache(&d)
+		}
+		return docs, nil
+}
+
+func (p *Proxy) addToCache(d *goprismic.Document) {
+	p.cache.Set(fmt.Sprintf("id++%s", d.Id), d)
 }
 
 // Clears the cache
