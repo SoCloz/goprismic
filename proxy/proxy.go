@@ -103,7 +103,7 @@ func (p *Proxy) query(query string) ([]goprismic.Document, error) {
 }
 
 func (p *Proxy) addToCache(d *goprismic.Document) {
-	p.cache.Set(fmt.Sprintf("id++%s", d.Id), d)
+	p.cache.Set(fmt.Sprintf("byid++%s", d.Id), d)
 }
 
 // Clears the cache

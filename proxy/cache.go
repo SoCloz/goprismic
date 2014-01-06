@@ -114,13 +114,17 @@ func (c *Cache) get(key string) (*CacheEntry, bool) {
 }
 
 func (c *Cache) add(key string, e *CacheEntry) {
-	el := &list.Element{Value: e}
-	c.entries[key] = el
-	c.lru.PushFront(el)
-	for c.lru.Len() > c.size {
-		del := c.lru.Back()
-		delete(c.entries, del.Value.(*CacheEntry).key)
-		c.lru.Remove(del)
+	if el, found := c.entries[key]; found {
+		c.lru.MoveToFront(el)
+	} else {
+		e.key = key
+		el := c.lru.PushFront(e)
+		c.entries[key] = el
+		for c.lru.Len() > c.size {
+			del := c.lru.Back()
+			delete(c.entries, del.Value.(*CacheEntry).key)
+			c.lru.Remove(del)
+		}
 	}
 }
 

@@ -53,6 +53,34 @@ func (s *ProxyTestSuite) TestGetBy(c *gocheck.C) {
 	c.Assert(f.AsText(), gocheck.Equals, "Pistachio", gocheck.Commentf("Proxy returns the same doc"))
 }
 
+func (s *ProxyTestSuite) TestLRU(c *gocheck.C) {
+	c.Assert(s.proxy, gocheck.NotNil, gocheck.Commentf("Connection with api is OK"))
+	ds, err := s.proxy.Search("product", "")
+	c.Assert(ds, gocheck.Not(gocheck.IsNil), gocheck.Commentf("Submit did not return an error - %s", err))
+	s.proxy.Clear()
+	stats := s.proxy.GetStats()
+	// accessing ds[0]
+	s.proxy.GetDocument(ds[0].Id)
+	stats1 := s.proxy.GetStats()
+	c.Assert(stats1.Hit, gocheck.Equals, stats.Hit, gocheck.Commentf("on an empty cache, no hit"))
+	c.Assert(stats1.Miss, gocheck.Equals, stats.Miss+1, gocheck.Commentf("on an empty cache, miss"))
+	// accessing ds[0] again
+	s.proxy.GetDocument(ds[0].Id)
+	stats1 = s.proxy.GetStats()
+	c.Assert(stats1.Hit, gocheck.Equals, stats.Hit+1, gocheck.Commentf("doc in cache, hit"))
+	c.Assert(stats1.Miss, gocheck.Equals, stats.Miss+1, gocheck.Commentf("doc in cache, no miss"))
+	// accessing another doc. LRU size is 1 => ds[0] should be evicted
+	s.proxy.GetDocument(ds[1].Id)
+	stats1 = s.proxy.GetStats()
+	c.Assert(stats1.Hit, gocheck.Equals, stats.Hit+1, gocheck.Commentf("doc not in cache, no hit"))
+	c.Assert(stats1.Miss, gocheck.Equals, stats.Miss+2, gocheck.Commentf("doc not in cache, miss"))
+	// accessing ds[0] again, should not be found in cache
+	s.proxy.GetDocument(ds[0].Id)
+	stats1 = s.proxy.GetStats()
+	c.Assert(stats1.Hit, gocheck.Equals, stats.Hit+1, gocheck.Commentf("doc evicted from cache, no hit"))
+	c.Assert(stats1.Miss, gocheck.Equals, stats.Miss+3, gocheck.Commentf("doc evicted from cache, miss"))
+}
+
 func (s *ProxyTestSuite) TestTtlAndGrace(c *gocheck.C) {
 	c.Assert(s.proxy, gocheck.NotNil, gocheck.Commentf("Connection with api is OK"))
 	d := s.docs[0]
