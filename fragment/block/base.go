@@ -28,11 +28,11 @@ func (b *BaseBlock) FormatHtmlText() string {
 	off := 0
 	index := 0
 	for k, r := range b.Text {
-		offsets[index] = k+off
-		off += len([]rune(html.EscapeString(string([]rune{r}))))-1
+		offsets[index] = k + off
+		off += len([]rune(html.EscapeString(string([]rune{r})))) - 1
 		index++
 	}
-	offsets[index] = len(b.Text)+off
+	offsets[index] = len(b.Text) + off
 	for _, s := range b.Spans {
 		begin := s.HtmlBeginTag()
 		end := s.HtmlEndTag()
