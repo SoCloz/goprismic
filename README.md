@@ -13,7 +13,7 @@ Usage
 ```go
 api, err := goprismic.Get("https://myrepo.prismic.io/api", "repo key")
 
-docs, err := api.Master().Form("everything").Query("[[:d = at(document.tags, [\"Featured\"])]]").Submit()
+docs, err := api.Master().Form("everything").Query("[[:d = at(document.tags, [\"Featured\"])]]").Order("my.product.name", goprismic.OrderAsc).Page(1).Submit()
 if err != nil {
 	// handle error
 }
@@ -52,7 +52,7 @@ p.ResolveLinks(r)
 Proxy
 -----
 
-A simple caching proxy is included. Only single document accesses are cached.
+A simple caching proxy is included.
 
 ```go
 // Up to 1000 documents will be cached for up to 1 hour. Documents will be asynchronously refreshed
@@ -67,6 +67,12 @@ doc, err := proxy.GetDocument(id)
 
 // Cached
 doc, err := proxy.GetDocumentBy("product", "fieldname", "fieldvalue")
+
+// Cached
+doc, err := proxy.GetDocumentBy("product", "fieldname", "fieldvalue")
+
+// Cached
+res, err := proxy.Search().Form("menu").PageSize(200).Submit()
 ```
 
 Documentation & links
