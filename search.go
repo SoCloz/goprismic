@@ -14,8 +14,17 @@ type SearchForm struct {
 }
 
 type SearchResult struct {
+	Page int `json:"page"`
+	TotalPages int `json:"total_pages"`
+	ResultsPerPage int `json:"results_per_page"`
+	TotalResults int `json:"total_results_size"`
 	Results []Document `json:"results"`
 }
+
+const(
+	OrderAsc = iota
+	OrderDesc
+)
 
 // Returns the error
 func (s *SearchForm) Error() error {
@@ -76,17 +85,43 @@ func (s *SearchForm) Data(data map[string]string) *SearchForm {
 	return s
 }
 
+// Sets the page number
+func (s *SearchForm) Page(page int) *SearchForm {
+	s.data["page"] = fmt.Sprintf("%d", page)
+	return s
+}
+
+// Sets the page size
+func (s *SearchForm) PageSize(pageSize int) *SearchForm {
+	s.data["pageSize"] = fmt.Sprintf("%d", pageSize)
+	return s
+}
+
+// Order result - can be chained multiple times
+//
+// example : form.Order("my.product.name", OrderAsc).Order("my.product.size", OrderDesc)
+func (s *SearchForm) Order(field string, order int) *SearchForm {
+	if _, found := s.data["orderings"]; !found {
+		s.data["orderings"] = ""
+	}
+	if order == OrderDesc {
+		field = fmt.Sprintf("%s desc", field)
+	}
+	s.data["orderings"] = fmt.Sprintf("%s[%s]", s.data["orderings"], field)
+	return s
+}
+
 // Searches the repository
-func (s *SearchForm) Submit() ([]Document, error) {
+func (s *SearchForm) Submit() (*SearchResult, error) {
 	sr := SearchResult{}
 	sr.Results = make([]Document, 0, 1024)
 	if s.err != nil {
-		return sr.Results, s.err
+		return &sr, s.err
 	}
 	s.data["ref"] = s.ref.Ref
 	err := s.api.call(s.form.Action, s.data, &sr)
 	if _, ok := err.(*json.UnmarshalTypeError); ok {
 		err = s.api.call(s.form.Action, s.data, &sr.Results)
 	}
-	return sr.Results, err
+	return &sr, err
 }

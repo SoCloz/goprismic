@@ -26,16 +26,21 @@ func (s *ApiTestSuite) TestApi(c *gocheck.C) {
 
 func (s *ApiTestSuite) TestSearch(c *gocheck.C) {
 	c.Assert(s.api, gocheck.NotNil, gocheck.Commentf("Connection with api is OK"))
-	docs, err := s.api.Master().Form("everything").Submit()
+	sr, err := s.api.Master().Form("everything").PageSize(15).Submit()
 	c.Assert(err, gocheck.IsNil, gocheck.Commentf("Submit did not return an error - %s", err))
-	c.Assert(len(docs), gocheck.Equals, 20, gocheck.Commentf("Submit did return 20 documents"))
+	c.Assert(len(sr.Results), gocheck.Equals, 15, gocheck.Commentf("Submit did return 20 documents"))
+	c.Assert(sr.ResultsPerPage, gocheck.Equals, 15, gocheck.Commentf("Submit did return the right page size"))
+
+	sr, err = s.api.Master().Form("everything").PageSize(15).Page(2).Submit()
+	c.Assert(err, gocheck.IsNil, gocheck.Commentf("Submit did not return an error - %s", err))
+	c.Assert(sr.Page, gocheck.Equals, 2, gocheck.Commentf("Submit did return the second page"))
 }
 
 func (s *ApiTestSuite) TestQuery(c *gocheck.C) {
 	c.Assert(s.api, gocheck.NotNil, gocheck.Commentf("Connection with api is OK"))
-	docs, err := s.api.Master().Form("everything").Query("[[:d = at(document.tags, [\"Macaron\"])]]").Submit()
+	sr, err := s.api.Master().Form("everything").Query("[[:d = at(document.tags, [\"Macaron\"])]]").Submit()
 	c.Assert(err, gocheck.IsNil, gocheck.Commentf("Submit did not return an error - %s", err))
-	c.Assert(len(docs), gocheck.Equals, 7, gocheck.Commentf("Submit did return 7 documents"))
+	c.Assert(len(sr.Results), gocheck.Equals, 7, gocheck.Commentf("Submit did return 7 documents"))
 
 }
 
