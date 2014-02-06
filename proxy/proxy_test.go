@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"log"
 	"testing"
 	"time"
 
@@ -56,7 +57,8 @@ func (s *ProxyTestSuite) TestGetBy(c *gocheck.C) {
 
 func (s *ProxyTestSuite) TestLRU(c *gocheck.C) {
 	c.Assert(s.proxy, gocheck.NotNil, gocheck.Commentf("Connection with api is OK"))
-	sr, err := s.proxy.Search("product", "")
+	sr, err := s.proxy.Search().Form("products").Submit()
+	log.Printf("%#v", sr)
 	c.Assert(sr, gocheck.Not(gocheck.IsNil), gocheck.Commentf("Submit did not return an error - %s", err))
 	s.proxy.Clear()
 	stats := s.proxy.GetStats()
