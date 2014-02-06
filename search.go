@@ -14,14 +14,14 @@ type SearchForm struct {
 }
 
 type SearchResult struct {
-	Page int `json:"page"`
-	TotalPages int `json:"total_pages"`
-	ResultsPerPage int `json:"results_per_page"`
-	TotalResults int `json:"total_results_size"`
-	Results []Document `json:"results"`
+	Page           int        `json:"page"`
+	TotalPages     int        `json:"total_pages"`
+	ResultsPerPage int        `json:"results_per_page"`
+	TotalResults   int        `json:"total_results_size"`
+	Results        []Document `json:"results"`
 }
 
-const(
+const (
 	OrderAsc = iota
 	OrderDesc
 )
