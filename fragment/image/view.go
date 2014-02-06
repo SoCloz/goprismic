@@ -7,13 +7,13 @@ import (
 
 // An image view
 type View struct {
-	Url        string
-	Alt        string
-	Copyright  string
+	Url        string `json:"url"`
+	Alt        string `json:"alt,omitempty"`
+	Copyright  string `json:"copyright,omitempty"`
 	Dimensions struct {
-		Width  int
-		Height int
-	}
+		Width  int `json:"width"`
+		Height int `json:"height"`
+	} `json:"dimensions"`
 }
 
 func (i *View) Decode(enc interface{}) error {

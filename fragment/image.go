@@ -10,8 +10,8 @@ import (
 
 // An image, with multiple views
 type Image struct {
-	Main  image.View
-	Views map[string]image.View
+	Main  image.View            `json:"main"`
+	Views map[string]image.View `json:"views"`
 }
 
 // Returns a view of this image
