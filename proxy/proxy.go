@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/SoCloz/goprismic"
@@ -39,71 +40,37 @@ func (p *Proxy) Direct() *goprismic.Api {
 
 // Fetches a document by id
 func (p *Proxy) GetDocument(id string) (*goprismic.Document, error) {
-	key := fmt.Sprintf("byid++%s", id)
-	d, err := p.getDoc(key, "[[:d = at(document.id, \""+id+"\")]]")
-	return d, err
+	sr, err := p.Search().Form("everything").Query("[[:d = at(document.id, \"" + id + "\")]]").Submit()
+	if err != nil || sr.TotalResults == 0 {
+		return nil, err
+	}
+	return &sr.Results[0], nil
+
 }
 
 // Fetches a document of a specific type by a field value
 func (p *Proxy) GetDocumentBy(docType, field string, value interface{}) (*goprismic.Document, error) {
-	key := fmt.Sprintf("by++%s++%s++%s", docType, field, value)
 	query := fmt.Sprintf("[[:d = at(my.%s.%s, \"%v\")][:d = any(document.type, [\"%s\"])]]", docType, field, value, docType)
-	d, err := p.getDoc(key, query)
-	return d, err
+	sr, err := p.Search().Form("everything").Query(query).Submit()
+	if err != nil || sr.TotalResults == 0 {
+		return nil, err
+	}
+	return &sr.Results[0], nil
 }
 
 // Search documents
-func (p *Proxy) Search(docType, q string) ([]goprismic.Document, error) {
-	key := fmt.Sprintf("search++%s++%s", docType, q)
-	query := fmt.Sprintf("[%s[:d = any(document.type, [\"%s\"])]]", q, docType)
-	d, err := p.getDocs(key, query)
-	return d, err
+func (p *Proxy) Search() *SearchForm {
+	f := &SearchForm{sf: p.api.Master(), p: p}
+	f.sig = sort.StringSlice{}
+	return f
 }
 
-func (p *Proxy) getDoc(key, query string) (*goprismic.Document, error) {
-	d, err := p.cache.Get(key, func() (interface{}, error) {
-		docs, err := p.query(query)
-		if err != nil || len(docs) == 0 {
-			return nil, err
-		}
-		return &docs[0], nil
-	})
-	if d != nil {
-		return d.(*goprismic.Document), nil
-	}
-	return nil, err
+func (p *Proxy) Refresh() {
+	p.api.Refresh()
 }
 
-func (p *Proxy) getDocs(key, query string) ([]goprismic.Document, error) {
-	d, err := p.cache.Get(key, func() (interface{}, error) {
-		return p.query(query)
-	})
-	if d != nil {
-		return d.([]goprismic.Document), nil
-	}
-	return []goprismic.Document{}, err
-}
-
-func (p *Proxy) query(query string) ([]goprismic.Document, error) {
-		docs, err := p.api.Master().Form("everything").Query(query).Submit()
-		if err != nil {
-			p.api.Refresh()
-			docs, err = p.api.Master().Form("everything").Query(query).Submit()
-			if err != nil {
-				return nil, err
-			}
-		}
-		if len(docs) == 0 {
-			return nil, nil
-		}
-		for _, d := range docs {
-			p.addToCache(&d)
-		}
-		return docs, nil
-}
-
-func (p *Proxy) addToCache(d *goprismic.Document) {
-	p.cache.Set(fmt.Sprintf("byid++%s", d.Id), d)
+func (p *Proxy) Get(key string, refresh RefreshFn) (interface{}, error) {
+	return p.cache.Get(key, refresh)
 }
 
 // Clears the cache

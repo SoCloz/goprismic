@@ -22,7 +22,8 @@ func (s *ProxyTestSuite) SetUpSuite(c *gocheck.C) {
 	p, err := New("https://lesbonneschoses.prismic.io/api", "", 1, 10*time.Second, 5*time.Second)
 	if err == nil {
 		s.proxy = p
-		s.docs, _ = s.proxy.Direct().Master().Form("everything").Submit()
+		sr, _ := s.proxy.Direct().Master().Form("everything").Submit()
+		s.docs = sr.Results
 	}
 }
 
@@ -55,27 +56,27 @@ func (s *ProxyTestSuite) TestGetBy(c *gocheck.C) {
 
 func (s *ProxyTestSuite) TestLRU(c *gocheck.C) {
 	c.Assert(s.proxy, gocheck.NotNil, gocheck.Commentf("Connection with api is OK"))
-	ds, err := s.proxy.Search("product", "")
-	c.Assert(ds, gocheck.Not(gocheck.IsNil), gocheck.Commentf("Submit did not return an error - %s", err))
+	sr, err := s.proxy.Search("product", "")
+	c.Assert(sr, gocheck.Not(gocheck.IsNil), gocheck.Commentf("Submit did not return an error - %s", err))
 	s.proxy.Clear()
 	stats := s.proxy.GetStats()
 	// accessing ds[0]
-	s.proxy.GetDocument(ds[0].Id)
+	s.proxy.GetDocument(sr.Results[0].Id)
 	stats1 := s.proxy.GetStats()
 	c.Assert(stats1.Hit, gocheck.Equals, stats.Hit, gocheck.Commentf("on an empty cache, no hit"))
 	c.Assert(stats1.Miss, gocheck.Equals, stats.Miss+1, gocheck.Commentf("on an empty cache, miss"))
 	// accessing ds[0] again
-	s.proxy.GetDocument(ds[0].Id)
+	s.proxy.GetDocument(sr.Results[0].Id)
 	stats1 = s.proxy.GetStats()
 	c.Assert(stats1.Hit, gocheck.Equals, stats.Hit+1, gocheck.Commentf("doc in cache, hit"))
 	c.Assert(stats1.Miss, gocheck.Equals, stats.Miss+1, gocheck.Commentf("doc in cache, no miss"))
 	// accessing another doc. LRU size is 1 => ds[0] should be evicted
-	s.proxy.GetDocument(ds[1].Id)
+	s.proxy.GetDocument(sr.Results[1].Id)
 	stats1 = s.proxy.GetStats()
 	c.Assert(stats1.Hit, gocheck.Equals, stats.Hit+1, gocheck.Commentf("doc not in cache, no hit"))
 	c.Assert(stats1.Miss, gocheck.Equals, stats.Miss+2, gocheck.Commentf("doc not in cache, miss"))
 	// accessing ds[0] again, should not be found in cache
-	s.proxy.GetDocument(ds[0].Id)
+	s.proxy.GetDocument(sr.Results[0].Id)
 	stats1 = s.proxy.GetStats()
 	c.Assert(stats1.Hit, gocheck.Equals, stats.Hit+1, gocheck.Commentf("doc evicted from cache, no hit"))
 	c.Assert(stats1.Miss, gocheck.Equals, stats.Miss+3, gocheck.Commentf("doc evicted from cache, miss"))
