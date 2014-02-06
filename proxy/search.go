@@ -2,7 +2,6 @@ package proxy
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strings"
 
@@ -70,7 +69,6 @@ func (s *SearchForm) Order(field string, order int) *SearchForm {
 func (s *SearchForm) Submit() (*goprismic.SearchResult, error) {
 	sort.Sort(s.sig)
 	key := strings.Join(s.sig, ",")
-	log.Printf("searching with cache %s", key)
 	sr, err := s.p.Get(key, func() (interface{}, error) {
 		sr, err := s.sf.Submit()
 		if err != nil {
