@@ -79,10 +79,9 @@ func (b *BaseBlock) decodeBlock(enc interface{}) error {
 					panic(fmt.Sprintf("Unknown span type %s", dec3["type"]))
 				}
 				err := s.Decode(v)
-				if err != nil {
-					return err
+				if err == nil {
+					b.Spans = append(b.Spans, s)
 				}
-				b.Spans = append(b.Spans, s)
 			}
 		}
 	}
