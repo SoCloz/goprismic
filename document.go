@@ -15,7 +15,7 @@ type Document struct {
 	Href      string       `json:"href"`
 	Tags      []string     `json:"tags"`
 	Slugs     []string     `json:"slugs"`
-	Fragments FragmentTree `json:"data"`
+	Fragments fragment.Tree `json:"data"`
 }
 
 // Returns the document slug
@@ -47,7 +47,7 @@ func (d *Document) ResolveLinks(r link.Resolver) {
 }
 
 // Returns the list of fragments of a certain name
-func (d *Document) GetFragments(field string) (FragmentList, bool) {
+func (d *Document) GetFragments(field string) (fragment.List, bool) {
 	frags, found := d.Fragments[d.Type]
 	if !found {
 		return nil, false
@@ -57,7 +57,7 @@ func (d *Document) GetFragments(field string) (FragmentList, bool) {
 }
 
 // Returns the nth fragment of a certain name
-func (d *Document) GetFragmentAt(field string, index int) (FragmentInterface, bool) {
+func (d *Document) GetFragmentAt(field string, index int) (fragment.Interface, bool) {
 	frags, found := d.GetFragments(field)
 	if !found || len(frags) <= index {
 		return nil, false
@@ -66,7 +66,7 @@ func (d *Document) GetFragmentAt(field string, index int) (FragmentInterface, bo
 }
 
 // Returns the first fragment of a certain name
-func (d *Document) GetFragment(field string) (FragmentInterface, bool) {
+func (d *Document) GetFragment(field string) (fragment.Interface, bool) {
 	return d.GetFragmentAt(field, 0)
 }
 

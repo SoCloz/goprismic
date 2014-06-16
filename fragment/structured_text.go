@@ -10,12 +10,17 @@ import (
 // A structured text fragment is a list of blocks
 type StructuredText []block.Block
 
-func (st *StructuredText) Decode(_ string, enc interface{}) error {
+func NewStructuredText(enc interface{}) (*StructuredText, error) {
 	dec, ok := enc.([]interface{})
 	if !ok {
-		return fmt.Errorf("%+v is not a slice", enc)
+		return nil, fmt.Errorf("%#v is not a slice", enc)
 	}
-	*st = make(StructuredText, 0, len(dec))
+	st := make(StructuredText, 0, len(dec))
+	return &st, nil
+}
+
+func (st *StructuredText) Decode(_ string, enc interface{}) error {
+	dec := enc.([]interface{})
 	for _, v := range dec {
 		dec, ok := v.(map[string]interface{})
 		if !ok {
