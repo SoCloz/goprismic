@@ -7,9 +7,11 @@ import (
 )
 
 type Stats struct {
-	Hit     int
-	Miss    int
-	Refresh int
+	Get      int
+	Hit      int
+	Miss     int
+	Refresh  int
+	Eviction int
 }
 
 // A cache Entry
@@ -45,6 +47,7 @@ func NewCache(size int, ttl, grace time.Duration) *Cache {
 func (c *Cache) Get(key string, refresh RefreshFn) (interface{}, error) {
 	c.Lock()
 	defer c.Unlock()
+	c.Stats.Get++
 
 	needRefresh := false
 	valid := false
@@ -124,6 +127,7 @@ func (c *Cache) add(key string, e *CacheEntry) {
 			del := c.lru.Back()
 			delete(c.entries, del.Value.(*CacheEntry).key)
 			c.lru.Remove(del)
+			c.Stats.Eviction++
 		}
 	}
 }
