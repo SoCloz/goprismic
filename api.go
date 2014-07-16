@@ -87,10 +87,10 @@ func (a *Api) call(u string, data map[string]string, res interface{}) error {
 	}
 	req.Header.Add("Accept", "application/json")
 	resp, errdo := http.DefaultClient.Do(req)
-	defer resp.Body.Close()
 	if errdo != nil {
 		return errdo
 	}
+	defer resp.Body.Close()
 	encoded, errread := ioutil.ReadAll(resp.Body)
 	if errread != nil {
 		return errread
