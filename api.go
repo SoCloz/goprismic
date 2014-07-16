@@ -6,12 +6,15 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"sync"
 )
 
 type Api struct {
 	URL         string
 	AccessToken string
 	Data        ApiData
+
+	sync.Mutex
 }
 
 type ApiData struct {
@@ -26,7 +29,10 @@ type ApiData struct {
 
 // Api entry point
 func Get(u, accessToken string) (*Api, error) {
-	api := &Api{AccessToken: accessToken, URL: u}
+	api := &Api{
+		AccessToken: accessToken,
+		URL: u,
+	}
 	api.Data.Refs = make([]Ref, 0, 128)
 	err := api.call(api.URL, map[string]string{}, &api.Data)
 	if err != nil {
@@ -80,16 +86,22 @@ func (a *Api) call(u string, data map[string]string, res interface{}) error {
 		values.Set("access_token", a.AccessToken)
 	}
 	callurl.RawQuery = values.Encode()
-
 	req, errreq := http.NewRequest("GET", callurl.String(), nil)
 	if errreq != nil {
 		return errreq
 	}
 	req.Header.Add("Accept", "application/json")
+
+	// lock api to avoid concurrent requests
+	// TODO : use a channel and goroutines
+	a.Lock()
+	defer a.Unlock()
+
 	resp, errdo := http.DefaultClient.Do(req)
 	if errdo != nil {
 		return errdo
 	}
+
 	defer resp.Body.Close()
 	encoded, errread := ioutil.ReadAll(resp.Body)
 	if errread != nil {
@@ -104,6 +116,7 @@ func (a *Api) call(u string, data map[string]string, res interface{}) error {
 			return err
 		}
 	}
+
 	errjson := json.Unmarshal(encoded, res)
 	return errjson
 }
