@@ -17,8 +17,8 @@ type Proxy struct {
 //
 // All documents are cached in a LRU cache of cacheSize elements.
 // Documents are cached for a maximum time of ttl, and will be asynchronously refreshed between ttl-grace and ttl.
-func New(u, accessToken string, cacheSize int, ttl, grace time.Duration) (*Proxy, error) {
-	a, err := goprismic.Get(u, accessToken)
+func New(u, accessToken string, workers int, cacheSize int, ttl, grace time.Duration) (*Proxy, error) {
+	a, err := goprismic.Get(u, accessToken, workers)
 	if err != nil {
 		return nil, err
 	}

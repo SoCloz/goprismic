@@ -6,15 +6,22 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"sync"
 )
+
+type work struct {
+	u string
+	data map[string]string
+	res interface{}
+
+	ret chan error
+}
 
 type Api struct {
 	URL         string
 	AccessToken string
 	Data        ApiData
 
-	sync.Mutex
+	queue chan work
 }
 
 type ApiData struct {
@@ -28,15 +35,23 @@ type ApiData struct {
 }
 
 // Api entry point
-func Get(u, accessToken string) (*Api, error) {
+func Get(u, accessToken string, workers int) (*Api, error) {
 	api := &Api{
 		AccessToken: accessToken,
 		URL: u,
+		queue: make(chan work),
 	}
 	api.Data.Refs = make([]Ref, 0, 128)
 	err := api.call(api.URL, map[string]string{}, &api.Data)
 	if err != nil {
 		return nil, err
+	}
+	if workers <= 0 {
+		panic("Cannot run with no worker")
+	}
+	for workers > 0 {
+		go api.loopWorker()
+		workers--
 	}
 	return api, nil
 }
@@ -72,6 +87,26 @@ func (a *Api) createSearchForm(r Ref) *SearchForm {
 	return f
 }
 
+
+func (a *Api) work(u string, data map[string]string, res interface{}) error {
+	w := work{
+		u: u,
+		data: data,
+		res: res,
+		ret: make(chan error),
+	}
+	a.queue <- w
+	return <- w.ret
+}
+
+func (a *Api) loopWorker() {
+	for {
+		w := <- a.queue
+		err := a.call(w.u, w.data, w.res)
+		w.ret <- err
+	}
+}
+
 func (a *Api) call(u string, data map[string]string, res interface{}) error {
 	callurl, errparse := url.Parse(u)
 	if errparse != nil {
@@ -91,11 +126,6 @@ func (a *Api) call(u string, data map[string]string, res interface{}) error {
 		return errreq
 	}
 	req.Header.Add("Accept", "application/json")
-
-	// lock api to avoid concurrent requests
-	// TODO : use a channel and goroutines
-	a.Lock()
-	defer a.Unlock()
 
 	resp, errdo := http.DefaultClient.Do(req)
 	if errdo != nil {

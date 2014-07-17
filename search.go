@@ -119,9 +119,9 @@ func (s *SearchForm) Submit() (*SearchResult, error) {
 		return &sr, s.err
 	}
 	s.data["ref"] = s.ref.Ref
-	err := s.api.call(s.form.Action, s.data, &sr)
+	err := s.api.work(s.form.Action, s.data, &sr)
 	if _, ok := err.(*json.UnmarshalTypeError); ok {
-		err = s.api.call(s.form.Action, s.data, &sr.Results)
+		err = s.api.work(s.form.Action, s.data, &sr.Results)
 	}
 	return &sr, err
 }
