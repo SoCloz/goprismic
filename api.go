@@ -56,7 +56,8 @@ type Config struct {
 // Default configuration
 var DefaultConfig = Config{
 	Workers: 3,
-	Timeout: 10 * time.Second,
+	Timeout: 5 * time.Second,
+	ReqPerSec: 5,
 }
 
 // Api entry point
