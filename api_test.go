@@ -15,7 +15,7 @@ type ApiTestSuite struct {
 var _ = gocheck.Suite(&ApiTestSuite{})
 
 func (s *ApiTestSuite) SetUpSuite(c *gocheck.C) {
-	s.api, _ = Get("https://lesbonneschoses.prismic.io/api", "", 1)
+	s.api, _ = Get("https://lesbonneschoses.prismic.io/api", "", DefaultConfig)
 }
 
 func (s *ApiTestSuite) TestApi(c *gocheck.C) {
