@@ -12,9 +12,9 @@ import (
 )
 
 type work struct {
-	u string
+	u    string
 	data map[string]string
-	res interface{}
+	res  interface{}
 
 	ret chan error
 }
@@ -26,9 +26,9 @@ type Api struct {
 
 	Config Config
 
-	client http.Client
-	queue chan work
-	curSec int
+	client    http.Client
+	queue     chan work
+	curSec    int
 	reqCurSec int
 }
 
@@ -41,7 +41,6 @@ type ApiData struct {
 	OAuthInitiate string            `json:"oauth_initiate"`
 	OAuthToken    string            `json:"oauth_token"`
 }
-
 
 type Config struct {
 	// Number of workers (simultaneous connections)
@@ -57,7 +56,7 @@ type Config struct {
 // Default configuration
 var DefaultConfig = Config{
 	Workers: 3,
-	Timeout: 10*time.Second,
+	Timeout: 10 * time.Second,
 }
 
 // Api entry point
@@ -65,11 +64,11 @@ var DefaultConfig = Config{
 func Get(u, accessToken string, cfg Config) (*Api, error) {
 	api := &Api{
 		AccessToken: accessToken,
-		URL: u,
-		Config: cfg,
-		queue: make(chan work),
-		client: http.Client{Timeout: cfg.Timeout},
-		curSec: -1,
+		URL:         u,
+		Config:      cfg,
+		queue:       make(chan work),
+		client:      http.Client{Timeout: cfg.Timeout},
+		curSec:      -1,
 	}
 	api.Data.Refs = make([]Ref, 0, 128)
 	err := api.call(api.URL, map[string]string{}, &api.Data)
@@ -80,7 +79,7 @@ func Get(u, accessToken string, cfg Config) (*Api, error) {
 	if cfg.Workers <= 0 {
 		panic("Cannot run with no worker")
 	}
-	for workers := 0 ; workers < cfg.Workers; workers++ {
+	for workers := 0; workers < cfg.Workers; workers++ {
 		go api.loopWorker()
 	}
 	return api, nil
@@ -117,21 +116,20 @@ func (a *Api) createSearchForm(r Ref) *SearchForm {
 	return f
 }
 
-
 func (a *Api) work(u string, data map[string]string, res interface{}) error {
 	w := work{
-		u: u,
+		u:    u,
 		data: data,
-		res: res,
-		ret: make(chan error),
+		res:  res,
+		ret:  make(chan error),
 	}
 	a.queue <- w
-	return <- w.ret
+	return <-w.ret
 }
 
 func (a *Api) loopWorker() {
 	for {
-		w := <- a.queue
+		w := <-a.queue
 		err := a.call(w.u, w.data, w.res)
 		w.ret <- err
 	}

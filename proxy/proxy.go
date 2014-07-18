@@ -12,7 +12,7 @@ type Config struct {
 	// Cache size
 	CacheSize int
 	// Documents are cached for a maximum time of ttl, and will be asynchronously refreshed between ttl-grace and ttl.
-	TTL time.Duration
+	TTL   time.Duration
 	Grace time.Duration
 }
 
