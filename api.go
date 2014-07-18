@@ -2,10 +2,13 @@ package goprismic
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type work struct {
@@ -21,7 +24,12 @@ type Api struct {
 	AccessToken string
 	Data        ApiData
 
+	Config Config
+
+	Client http.Client
 	queue chan work
+	curSec int
+	reqCurSec int
 }
 
 type ApiData struct {
@@ -34,24 +42,46 @@ type ApiData struct {
 	OAuthToken    string            `json:"oauth_token"`
 }
 
+
+type Config struct {
+	// Number of workers (simultaneous connections)
+	Workers int
+	// Timeout for HTTP requests
+	Timeout time.Duration
+	// Max requests per second (default: 0 - unlimited)
+	ReqPerSec int
+	// Debug mode
+	Debug bool
+}
+
+// Default configuration
+var DefaultConfig = Config{
+	Workers: 3,
+	Timeout: 10*time.Second,
+}
+
 // Api entry point
-func Get(u, accessToken string, workers int) (*Api, error) {
+// Use Get(url, accessToken, DefaultConfig) to use the default config
+func Get(u, accessToken string, cfg Config) (*Api, error) {
 	api := &Api{
 		AccessToken: accessToken,
 		URL: u,
+		Config: cfg,
 		queue: make(chan work),
+		Client: http.Client{Timeout: cfg.Timeout},
+		curSec: -1,
 	}
 	api.Data.Refs = make([]Ref, 0, 128)
 	err := api.call(api.URL, map[string]string{}, &api.Data)
 	if err != nil {
 		return nil, err
 	}
-	if workers <= 0 {
+
+	if cfg.Workers <= 0 {
 		panic("Cannot run with no worker")
 	}
-	for workers > 0 {
+	for workers := 0 ; workers < cfg.Workers; workers++ {
 		go api.loopWorker()
-		workers--
 	}
 	return api, nil
 }
@@ -108,6 +138,22 @@ func (a *Api) loopWorker() {
 }
 
 func (a *Api) call(u string, data map[string]string, res interface{}) error {
+	// test the number of requests per second
+	if a.Config.ReqPerSec > 0 {
+		curSec := time.Now().Second()
+		if curSec != a.curSec {
+			a.curSec = curSec
+			a.reqCurSec = 0
+		}
+		a.reqCurSec++
+		if a.reqCurSec > a.Config.ReqPerSec {
+			if a.Config.Debug {
+				log.Printf("Prismic - Too many requests")
+			}
+			return errors.New("Too many requests")
+		}
+	}
+	// call
 	callurl, errparse := url.Parse(u)
 	if errparse != nil {
 		return errparse
@@ -127,7 +173,10 @@ func (a *Api) call(u string, data map[string]string, res interface{}) error {
 	}
 	req.Header.Add("Accept", "application/json")
 
-	resp, errdo := http.DefaultClient.Do(req)
+	if a.Config.Debug {
+		log.Printf("Prismic - requesting %s", callurl.String())
+	}
+	resp, errdo := a.Client.Do(req)
 	if errdo != nil {
 		return errdo
 	}

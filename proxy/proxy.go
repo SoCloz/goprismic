@@ -8,6 +8,14 @@ import (
 	"github.com/SoCloz/goprismic"
 )
 
+type Config struct {
+	// Cache size
+	CacheSize int
+	// Documents are cached for a maximum time of ttl, and will be asynchronously refreshed between ttl-grace and ttl.
+	TTL time.Duration
+	Grace time.Duration
+}
+
 type Proxy struct {
 	cache *Cache
 	api   *goprismic.Api
@@ -16,13 +24,12 @@ type Proxy struct {
 // Creates a proxy
 //
 // All documents are cached in a LRU cache of cacheSize elements.
-// Documents are cached for a maximum time of ttl, and will be asynchronously refreshed between ttl-grace and ttl.
-func New(u, accessToken string, workers int, cacheSize int, ttl, grace time.Duration) (*Proxy, error) {
-	a, err := goprismic.Get(u, accessToken, workers)
+func New(u, accessToken string, apiCfg goprismic.Config, cfg Config) (*Proxy, error) {
+	a, err := goprismic.Get(u, accessToken, apiCfg)
 	if err != nil {
 		return nil, err
 	}
-	c := NewCache(cacheSize, ttl, grace)
+	c := NewCache(cfg.CacheSize, cfg.TTL, cfg.Grace)
 	return &Proxy{cache: c, api: a}, nil
 }
 
