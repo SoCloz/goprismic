@@ -20,7 +20,7 @@ type ProxyTestSuite struct {
 var _ = gocheck.Suite(&ProxyTestSuite{})
 
 func (s *ProxyTestSuite) SetUpSuite(c *gocheck.C) {
-	p, err := New("https://lesbonneschoses.prismic.io/api", "", goprismic.DefaultConfig, Config{CacheSize: 1, TTL: 10*time.Second, Grace: 5*time.Second})
+	p, err := New("https://lesbonneschoses.prismic.io/api", "", goprismic.Config{Workers: 1, ReqPerSec: 0, Timeout: 30*time.Second}, Config{CacheSize: 1, TTL: 10*time.Second, Grace: 5*time.Second})
 	if err == nil {
 		s.proxy = p
 		sr, _ := s.proxy.Direct().Master().Form("everything").Submit()
