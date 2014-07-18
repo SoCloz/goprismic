@@ -5,14 +5,16 @@ goprismic
 
 Prismic.io client kit for Go
 
-This client should be feature complete and stable. It is currently used in production on http://www.socloz.fr.
+This client is currently used in production on http://www.socloz.com.
+
+Go 1.3 is required.
 
 Usage
 -----
 
 ```go
-// start api with 3 workers
-api, err := goprismic.Get("https://myrepo.prismic.io/api", "repo key", 3)
+// start api with the default config (3 workers, 5 req/s max, 5 seconds timeout on requests)
+api, err := goprismic.Get("https://myrepo.prismic.io/api", "repo key", goprismic.DefaultConfig)
 
 docs, err := api.Master().Form("everything").Query("[[:d = at(document.tags, [\"Featured\"])]]").Order("my.product.name", goprismic.OrderAsc).Page(1).Submit()
 if err != nil {
@@ -58,7 +60,7 @@ A simple caching proxy is included.
 ```go
 // Up to 1000 documents will be cached for up to 1 hour. Documents will be asynchronously refreshed
 // if accessed 10 minutes before expiration (or later).
-proxy, err := proxy.New("https://myrepo.prismic.io/api", "repo key", 3, 1000, 1*time.Hour, 10*time.Minute)
+proxy, err := proxy.New("https://myrepo.prismic.io/api", "repo key", goprismic.DefaultConfig, proxy.Config{CacheSize: 1000, TTL: 1*time.Hour, Grace: 10*time.Minute})
 
 // Not cached
 docs, err := proxy.Direct().Master().Form("everything").Submit()
@@ -76,10 +78,12 @@ doc, err := proxy.GetDocumentBy("product", "fieldname", "fieldvalue")
 res, err := proxy.Search().Form("menu").PageSize(200).Submit()
 ```
 
-Workers
--------
+Workers & Rate limiting
+-----------------------
 
 Access to the prismic api is done using workers, limiting the number of simultaneous connexions to the API.
+
+A maximum number of requests per second is also set. If the threshold is passed, errors are returned until the next second.
 
 
 Documentation & links
