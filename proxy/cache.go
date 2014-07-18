@@ -80,7 +80,9 @@ func (c *Cache) Get(key string, refresh RefreshFn) (interface{}, error) {
 		} else if !found {
 			e = &CacheEntry{}
 			err = c.refresh(e, refresh)
-			c.add(key, e)
+			if err == nil {
+				c.add(key, e)
+			}
 		} else {
 			err = c.refresh(e, refresh)
 		}
