@@ -26,7 +26,7 @@ type Api struct {
 
 	Config Config
 
-	Client http.Client
+	client http.Client
 	queue chan work
 	curSec int
 	reqCurSec int
@@ -68,7 +68,7 @@ func Get(u, accessToken string, cfg Config) (*Api, error) {
 		URL: u,
 		Config: cfg,
 		queue: make(chan work),
-		Client: http.Client{Timeout: cfg.Timeout},
+		client: http.Client{Timeout: cfg.Timeout},
 		curSec: -1,
 	}
 	api.Data.Refs = make([]Ref, 0, 128)
@@ -176,7 +176,7 @@ func (a *Api) call(u string, data map[string]string, res interface{}) error {
 	if a.Config.Debug {
 		log.Printf("Prismic - requesting %s", callurl.String())
 	}
-	resp, errdo := a.Client.Do(req)
+	resp, errdo := a.client.Do(req)
 	if errdo != nil {
 		return errdo
 	}
