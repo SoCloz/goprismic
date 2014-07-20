@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"time"
 
@@ -11,14 +12,19 @@ import (
 type Config struct {
 	// Cache size
 	CacheSize int
-	// Documents are cached for a maximum time of ttl, and will be asynchronously refreshed between ttl-grace and ttl.
+	// Documents are cached for a maximum time of ttl.
 	TTL   time.Duration
-	Grace time.Duration
+	// API Master ref refresh frequency
+	MasterRefresh time.Duration
+	// inherited from api
+	debug bool
 }
 
 type Proxy struct {
 	cache *Cache
 	api   *goprismic.Api
+
+	Config Config
 }
 
 // Creates a proxy
@@ -29,8 +35,15 @@ func New(u, accessToken string, apiCfg goprismic.Config, cfg Config) (*Proxy, er
 	if err != nil {
 		return nil, err
 	}
-	c := NewCache(cfg.CacheSize, cfg.TTL, cfg.Grace)
-	return &Proxy{cache: c, api: a}, nil
+	if cfg.MasterRefresh == 0 {
+		cfg.MasterRefresh = time.Minute
+	}
+	cfg.debug = apiCfg.Debug
+	c := NewCache(cfg.CacheSize, cfg.TTL)
+	c.revision = a.GetMasterRef()
+	p := &Proxy{cache: c, api: a, Config: cfg}
+	go p.loopRefresh()
+	return p, nil
 }
 
 // Returns the cache stats
@@ -72,10 +85,29 @@ func (p *Proxy) Search() *SearchForm {
 	return f
 }
 
-func (p *Proxy) Refresh() {
+// Refreshes the master ref, returns true if master ref has changed
+func (p *Proxy) Refresh() bool {
 	p.api.Refresh()
+	oldRev := p.cache.revision
+	p.cache.revision = p.api.GetMasterRef()
+	return oldRev != p.cache.revision
 }
 
+// Refreshes the master ref, returns true if master ref has changed
+func (p *Proxy) loopRefresh() {
+	tick := time.Tick(p.Config.MasterRefresh)
+	for {
+		select {
+		case <-tick:
+			if p.Refresh() && p.Config.debug {
+				log.Printf("Prismic - refreshing master ref")
+			}
+
+		}
+	}
+}
+
+// Get something from the proxy
 func (p *Proxy) Get(key string, refresh RefreshFn) (interface{}, error) {
 	return p.cache.Get(key, refresh)
 }

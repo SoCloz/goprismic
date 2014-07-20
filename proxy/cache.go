@@ -11,15 +11,18 @@ type Stats struct {
 	Hit      int
 	Miss     int
 	Refresh  int
+	RefreshError  int
 	Eviction int
+	Error   int
 }
 
 // A cache Entry
 type CacheEntry struct {
 	key          string
 	entry        interface{}
+	revision     string
+	refreshing   bool
 	validUntil   time.Time
-	refreshAfter time.Time
 }
 
 // A cache
@@ -29,15 +32,15 @@ type Cache struct {
 	lru     *list.List
 	size    int
 	ttl     time.Duration
-	grace   time.Duration
 	Stats   Stats
+	revision string
 }
 
 type RefreshFn func() (interface{}, error)
 
 // Creates a cache
-func NewCache(size int, ttl, grace time.Duration) *Cache {
-	c := Cache{size: size, ttl: ttl, grace: grace}
+func NewCache(size int, ttl time.Duration) *Cache {
+	c := Cache{size: size, ttl: ttl}
 	c.entries = make(map[string]*list.Element)
 	c.lru = list.New()
 	return &c
@@ -49,35 +52,20 @@ func (c *Cache) Get(key string, refresh RefreshFn) (interface{}, error) {
 	defer c.Unlock()
 	c.Stats.Get++
 
-	needRefresh := false
-	valid := false
-
+	var err error
 	e, found := c.get(key)
 
-	now := time.Now()
-	if found {
-		if now.After(e.validUntil) {
-			needRefresh = true
-			c.Stats.Miss++
-		} else if now.After(e.refreshAfter) {
-			needRefresh = true
-			valid = true
-			c.Stats.Hit++
-			c.Stats.Refresh++
-		} else {
-			valid = true
-			c.Stats.Hit++
+	if found && e.validUntil.After(time.Now()) {
+		c.Stats.Hit++
+		// bad revision - old content is always returned
+		// and content is refreshed
+		if c.revision != e.revision && !e.refreshing {
+			e.refreshing = true
+			go c.asyncRefresh(e, refresh)
 		}
 	} else {
 		c.Stats.Miss++
-	}
-
-	var err error
-	if !found || needRefresh {
-		if valid {
-			e.refreshAfter = now.Add(time.Duration(1) * time.Second)
-			go c.refresh(e, refresh)
-		} else if !found {
+		if !found {
 			e = &CacheEntry{}
 			err = c.refresh(e, refresh)
 			if err == nil {
@@ -86,6 +74,9 @@ func (c *Cache) Get(key string, refresh RefreshFn) (interface{}, error) {
 		} else {
 			err = c.refresh(e, refresh)
 		}
+	}
+	if err != nil {
+		c.Stats.Error++
 	}
 	return e.entry, err
 }
@@ -97,15 +88,23 @@ func (c *Cache) Set(key string, v interface{}) {
 	c.add(key, e)
 }
 
+func (c *Cache) asyncRefresh(e *CacheEntry, refresh RefreshFn) {
+	err := c.refresh(e, refresh)
+	if err == nil {
+		c.Stats.Refresh++
+	} else {
+		c.Stats.RefreshError++
+	}
+}
 func (c *Cache) refresh(e *CacheEntry, refresh RefreshFn) error {
 	v, err := refresh()
+	e.refreshing = false
 	if err != nil {
 		return err
 	}
 	e.entry = v
-	n := time.Now()
-	e.validUntil = n.Add(c.ttl)
-	e.refreshAfter = e.validUntil.Add(-c.grace)
+	e.revision = c.revision
+	e.validUntil = time.Now().Add(c.ttl)
 	return nil
 }
 
@@ -129,7 +128,9 @@ func (c *Cache) add(key string, e *CacheEntry) {
 			del := c.lru.Back()
 			delete(c.entries, del.Value.(*CacheEntry).key)
 			c.lru.Remove(del)
-			c.Stats.Eviction++
+			if time.Now().Before(e.validUntil) {
+				c.Stats.Eviction++
+			}
 		}
 	}
 }

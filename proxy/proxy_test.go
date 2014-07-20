@@ -20,7 +20,7 @@ type ProxyTestSuite struct {
 var _ = gocheck.Suite(&ProxyTestSuite{})
 
 func (s *ProxyTestSuite) SetUpSuite(c *gocheck.C) {
-	p, err := New("https://lesbonneschoses.prismic.io/api", "", goprismic.Config{Workers: 1, ReqPerSec: 0, Timeout: 30*time.Second}, Config{CacheSize: 1, TTL: 10*time.Second, Grace: 5*time.Second})
+	p, err := New("https://lesbonneschoses.prismic.io/api", "", goprismic.Config{Workers: 1, ReqPerSec: 0, Timeout: 30*time.Second}, Config{CacheSize: 1, TTL: 10*time.Second})
 	if err == nil {
 		s.proxy = p
 		sr, _ := s.proxy.Direct().Master().Form("everything").Submit()
@@ -84,7 +84,7 @@ func (s *ProxyTestSuite) TestLRU(c *gocheck.C) {
 	c.Assert(stats1.Miss, gocheck.Equals, stats.Miss+3, gocheck.Commentf("doc evicted from cache, miss"))
 }
 
-func (s *ProxyTestSuite) TestTtlAndGrace(c *gocheck.C) {
+func (s *ProxyTestSuite) TestTtl(c *gocheck.C) {
 	c.Assert(s.proxy, gocheck.NotNil, gocheck.Commentf("Connection with api is OK"))
 	d := s.docs[0]
 	s.proxy.GetDocument(d.Id)
@@ -92,11 +92,7 @@ func (s *ProxyTestSuite) TestTtlAndGrace(c *gocheck.C) {
 	s.proxy.GetDocument(d.Id)
 	c.Assert(s.proxy.GetStats(), gocheck.DeepEquals, Stats{Get: 2, Hit: 1, Miss: 1}, gocheck.Commentf("miss+hit"))
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(12 * time.Second)
 	s.proxy.GetDocument(d.Id)
-	c.Assert(s.proxy.GetStats(), gocheck.DeepEquals, Stats{Get: 3, Hit: 2, Miss: 1, Refresh: 1}, gocheck.Commentf("miss+hit+refresh"))
-
-	time.Sleep(12 * time.Second) // Add some delay to allow for async refresh to finish
-	s.proxy.GetDocument(d.Id)
-	c.Assert(s.proxy.GetStats(), gocheck.DeepEquals, Stats{Get: 4, Hit: 2, Miss: 2, Refresh: 1}, gocheck.Commentf("miss+hit+refresh+miss"))
+	c.Assert(s.proxy.GetStats(), gocheck.DeepEquals, Stats{Get: 3, Hit: 1, Miss: 2}, gocheck.Commentf("miss+hit+refresh+miss"))
 }

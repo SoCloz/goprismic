@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 
@@ -66,14 +67,20 @@ func (s *SearchForm) Order(field string, order int) *SearchForm {
 }
 
 // Searches the repository
+// If search fails, it might mean that the master revision has changed
 func (s *SearchForm) Submit() (*goprismic.SearchResult, error) {
 	sort.Sort(s.sig)
 	key := strings.Join(s.sig, ",")
 	sr, err := s.p.Get(key, func() (interface{}, error) {
 		sr, err := s.sf.Submit()
-		if err != nil {
-			s.p.Refresh()
-			sr, err = s.sf.Submit()
+		// request might have failed because master ref is outdated
+		if err != nil && s.p.api.Status == goprismic.StatusOK {
+			if s.p.Config.debug {
+				log.Printf("Prismic - request failed because of %s - refreshing master ref and retrying", err)
+			}
+			if s.p.Refresh() {
+				sr, err = s.sf.Submit()
+			}
 		}
 		return sr, err
 	})

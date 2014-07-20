@@ -19,6 +19,12 @@ type work struct {
 	ret chan error
 }
 
+const (
+	StatusOK = iota
+	StatusDegraded
+	StatusOverCapacity
+)
+
 type Api struct {
 	URL         string
 	AccessToken string
@@ -26,10 +32,12 @@ type Api struct {
 
 	Config Config
 
+	Status int
+
 	client    http.Client
 	queue     chan work
-	curSec    int
 	reqCurSec int
+	retryAt   time.Time
 }
 
 type ApiData struct {
@@ -69,7 +77,6 @@ func Get(u, accessToken string, cfg Config) (*Api, error) {
 		Config:      cfg,
 		queue:       make(chan work),
 		client:      http.Client{Timeout: cfg.Timeout},
-		curSec:      -1,
 	}
 	api.Data.Refs = make([]Ref, 0, 128)
 	err := api.call(api.URL, map[string]string{}, &api.Data)
@@ -99,6 +106,16 @@ func (a *Api) Master() *SearchForm {
 		}
 	}
 	return &SearchForm{err: fmt.Errorf("Master ref not found !?!")}
+}
+
+// Returns the master ref
+func (a *Api) GetMasterRef() string {
+	for _, r := range a.Data.Refs {
+		if r.IsMasterRef {
+			return r.Ref
+		}
+	}
+	return ""
 }
 
 // Fetch another ref
@@ -137,22 +154,7 @@ func (a *Api) loopWorker() {
 }
 
 func (a *Api) call(u string, data map[string]string, res interface{}) error {
-	// test the number of requests per second
-	if a.Config.ReqPerSec > 0 {
-		curSec := time.Now().Second()
-		if curSec != a.curSec {
-			a.curSec = curSec
-			a.reqCurSec = 0
-		}
-		a.reqCurSec++
-		if a.reqCurSec > a.Config.ReqPerSec {
-			if a.Config.Debug {
-				log.Printf("Prismic - Too many requests")
-			}
-			return errors.New("Too many requests")
-		}
-	}
-	// call
+	// build query
 	callurl, errparse := url.Parse(u)
 	if errparse != nil {
 		return errparse
@@ -166,6 +168,34 @@ func (a *Api) call(u string, data map[string]string, res interface{}) error {
 		values.Set("access_token", a.AccessToken)
 	}
 	callurl.RawQuery = values.Encode()
+
+	// test the number of requests per second
+	if a.Config.ReqPerSec > 0 {
+		if a.Status != StatusOK && !a.retryAt.IsZero() {
+			if time.Now().Before(a.retryAt) {
+				if a.Config.Debug {
+					log.Printf("Prismic - over capacity - ignoring request %s", callurl.String())
+				}
+				return errors.New("Prismic - over capacity - aborting request")
+			} else {
+				if a.Status == StatusOverCapacity {
+					a.Status = StatusDegraded
+				} else {
+					a.Status = StatusOK
+				}
+				a.reqCurSec = 0
+			}
+		}
+		a.reqCurSec++
+		if a.reqCurSec > a.Config.ReqPerSec {
+			if a.Config.Debug {
+				log.Printf("Prismic - over capacity - aborting request %s", callurl.String())
+			}
+			a.Status = StatusOverCapacity
+			a.retryAt = time.Now().Add(1*time.Second)
+			return errors.New("Prismic - over capacity - aborting request")
+		}
+	}
 	req, errreq := http.NewRequest("GET", callurl.String(), nil)
 	if errreq != nil {
 		return errreq
@@ -191,6 +221,17 @@ func (a *Api) call(u string, data map[string]string, res interface{}) error {
 		if errjson != nil {
 			return errjson
 		} else {
+			if err.IsOverCapacity() {
+				a.Status = StatusOverCapacity
+				a.retryAt = time.Unix(err.Until/1000, (err.Until%1000)*100000)
+				if a.Config.Debug {
+					log.Printf("Prismic - over capacity error, will retry on %s", a.retryAt)
+				}
+			} else {
+				if a.Config.Debug {
+					log.Printf("Prismic - error %s", err)
+				}
+			}
 			return err
 		}
 	}
