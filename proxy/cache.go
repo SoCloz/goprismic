@@ -2,48 +2,53 @@ package proxy
 
 import (
 	"container/list"
+	"math/rand"
 	"sync"
 	"time"
 )
 
 type Stats struct {
-	Get      int
-	Hit      int
-	Miss     int
-	Refresh  int
-	RefreshError  int
-	Eviction int
-	Error   int
+	Get          int
+	Hit          int
+	Miss         int
+	Refresh      int
+	RefreshError int
+	Eviction     int
+	Error        int
 }
 
 // A cache Entry
 type CacheEntry struct {
-	key          string
-	entry        interface{}
-	revision     string
-	refreshing   bool
-	validUntil   time.Time
+	key        string
+	entry      interface{}
+	revision   string
+	refreshing bool
+	validUntil time.Time
 }
 
 // A cache
 type Cache struct {
 	sync.Mutex
-	entries map[string]*list.Element
-	lru     *list.List
-	size    int
-	ttl     time.Duration
-	Stats   Stats
-	revision string
+	entries       map[string]*list.Element
+	lru           *list.List
+	size          int
+	ttl           time.Duration
+	Stats         Stats
+	refreshChance float32
+	revision      string
 }
 
 type RefreshFn func() (interface{}, error)
 
 // Creates a cache
-func NewCache(size int, ttl time.Duration) *Cache {
-	c := Cache{size: size, ttl: ttl}
-	c.entries = make(map[string]*list.Element)
-	c.lru = list.New()
-	return &c
+func NewCache(size int, ttl time.Duration, refreshChance float32) *Cache {
+	return &Cache{
+		size:          size,
+		ttl:           ttl,
+		entries:       make(map[string]*list.Element),
+		lru:           list.New(),
+		refreshChance: refreshChance,
+	}
 }
 
 // Fetches something from the cache. If not found, refresh() will be called
@@ -60,8 +65,10 @@ func (c *Cache) Get(key string, refresh RefreshFn) (interface{}, error) {
 		// bad revision - old content is always returned
 		// and content is refreshed
 		if c.revision != e.revision && !e.refreshing {
-			e.refreshing = true
-			go c.asyncRefresh(e, refresh)
+			if c.refreshChance == 1.0 || rand.Float32() <= c.refreshChance {
+				e.refreshing = true
+				go c.asyncRefresh(e, refresh)
+			}
 		}
 	} else {
 		c.Stats.Miss++

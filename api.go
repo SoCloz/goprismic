@@ -21,7 +21,6 @@ type work struct {
 
 const (
 	StatusOK = iota
-	StatusDegraded
 	StatusOverCapacity
 )
 
@@ -34,10 +33,9 @@ type Api struct {
 
 	Status int
 
-	client    http.Client
-	queue     chan work
-	reqCurSec int
-	retryAt   time.Time
+	client  http.Client
+	queue   chan work
+	retryAt time.Time
 }
 
 type ApiData struct {
@@ -55,8 +53,6 @@ type Config struct {
 	Workers int
 	// Timeout for HTTP requests
 	Timeout time.Duration
-	// Max requests per second (default: 0 - unlimited)
-	ReqPerSec int
 	// Debug mode
 	Debug bool
 }
@@ -65,7 +61,6 @@ type Config struct {
 var DefaultConfig = Config{
 	Workers: 3,
 	Timeout: 5 * time.Second,
-	ReqPerSec: 5,
 }
 
 // Api entry point
@@ -169,31 +164,16 @@ func (a *Api) call(u string, data map[string]string, res interface{}) error {
 	}
 	callurl.RawQuery = values.Encode()
 
-	// test the number of requests per second
-	if a.Config.ReqPerSec > 0 {
-		if a.Status != StatusOK && !a.retryAt.IsZero() {
-			if time.Now().Before(a.retryAt) {
-				if a.Config.Debug {
-					log.Printf("Prismic - over capacity - ignoring request %s", callurl.String())
-				}
-				return errors.New("Prismic - over capacity - aborting request")
-			} else {
-				if a.Status == StatusOverCapacity {
-					a.Status = StatusDegraded
-				} else {
-					a.Status = StatusOK
-				}
-				a.reqCurSec = 0
-			}
-		}
-		a.reqCurSec++
-		if a.reqCurSec > a.Config.ReqPerSec {
+	if a.Status != StatusOK {
+		if time.Now().Before(a.retryAt) {
 			if a.Config.Debug {
-				log.Printf("Prismic - over capacity - aborting request %s", callurl.String())
+				log.Printf("Prismic - over capacity - ignoring request %s", callurl.String())
 			}
-			a.Status = StatusOverCapacity
-			a.retryAt = time.Now().Add(1*time.Second)
 			return errors.New("Prismic - over capacity - aborting request")
+		} else {
+			if a.Status == StatusOverCapacity {
+				a.Status = StatusOK
+			}
 		}
 	}
 	req, errreq := http.NewRequest("GET", callurl.String(), nil)
@@ -223,7 +203,11 @@ func (a *Api) call(u string, data map[string]string, res interface{}) error {
 		} else {
 			if err.IsOverCapacity() {
 				a.Status = StatusOverCapacity
-				a.retryAt = time.Unix(err.Until/1000, (err.Until%1000)*100000)
+				if err.Until == 0 {
+					a.retryAt = time.Now().Add(1 * time.Second)
+				} else {
+					a.retryAt = time.Unix(err.Until/1000, (err.Until%1000)*100000)
+				}
 				if a.Config.Debug {
 					log.Printf("Prismic - over capacity error, will retry on %s", a.retryAt)
 				}

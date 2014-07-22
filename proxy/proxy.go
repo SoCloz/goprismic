@@ -13,9 +13,11 @@ type Config struct {
 	// Cache size
 	CacheSize int
 	// Documents are cached for a maximum time of ttl.
-	TTL   time.Duration
+	TTL time.Duration
 	// API Master ref refresh frequency
 	MasterRefresh time.Duration
+	// Base refresh chance after master reference chance
+	BaselineRefreshChance float32
 	// inherited from api
 	debug bool
 }
@@ -25,6 +27,9 @@ type Proxy struct {
 	api   *goprismic.Api
 
 	Config Config
+
+	lastRefresh           time.Time
+	baselineRefreshChance float32
 }
 
 // Creates a proxy
@@ -39,9 +44,18 @@ func New(u, accessToken string, apiCfg goprismic.Config, cfg Config) (*Proxy, er
 		cfg.MasterRefresh = time.Minute
 	}
 	cfg.debug = apiCfg.Debug
-	c := NewCache(cfg.CacheSize, cfg.TTL)
+	if cfg.BaselineRefreshChance == 0 {
+		cfg.BaselineRefreshChance = 1.0
+	}
+	c := NewCache(cfg.CacheSize, cfg.TTL, 1.0)
 	c.revision = a.GetMasterRef()
-	p := &Proxy{cache: c, api: a, Config: cfg}
+	p := &Proxy{
+		cache:                 c,
+		api:                   a,
+		Config:                cfg,
+		lastRefresh:           time.Now(),
+		baselineRefreshChance: cfg.BaselineRefreshChance,
+	}
 	go p.loopRefresh()
 	return p, nil
 }
@@ -90,19 +104,57 @@ func (p *Proxy) Refresh() bool {
 	p.api.Refresh()
 	oldRev := p.cache.revision
 	p.cache.revision = p.api.GetMasterRef()
-	return oldRev != p.cache.revision
+	if oldRev != p.cache.revision {
+		p.lastRefresh = time.Now()
+		// refresh : 100% cache miss expected => we switch to baseline
+		p.cache.refreshChance = p.baselineRefreshChance
+		if p.Config.debug {
+			log.Printf("Prismic - refreshing master ref and lowering refresh chance to %.1f%%", p.cache.refreshChance*100)
+		}
+		return true
+	}
+	return false
 }
 
 // Refreshes the master ref, returns true if master ref has changed
 func (p *Proxy) loopRefresh() {
+	prevRefreshError, prevRefresh := 0, 0
 	tick := time.Tick(p.Config.MasterRefresh)
 	for {
 		select {
 		case <-tick:
-			if p.Refresh() && p.Config.debug {
-				log.Printf("Prismic - refreshing master ref")
+			refreshed := p.Refresh()
+			deltaRefreshError := p.cache.Stats.RefreshError - prevRefreshError
+			deltaRefresh := p.cache.Stats.Refresh - prevRefresh
+			// ensure that chance is always > 0 and valid
+			refreshChance := float32(deltaRefresh+1) / float32(deltaRefresh+deltaRefreshError+1)
+			if refreshChance < p.baselineRefreshChance {
+				p.baselineRefreshChance = refreshChance
+				if p.Config.debug {
+					log.Printf("Prismic - lowering baseline refresh chance to %.2f%%", p.baselineRefreshChance*100.0)
+				}
 			}
-
+			if !refreshed {
+				if refreshChance < p.cache.refreshChance {
+					p.cache.refreshChance = refreshChance
+					if p.Config.debug {
+						log.Printf("Prismic - lowering refresh chance to %.2f%%", p.cache.refreshChance*100.0)
+					}
+				}
+				if refreshChance > p.cache.refreshChance {
+					if refreshChance < p.cache.refreshChance*1.1 {
+						p.cache.refreshChance = refreshChance
+					} else {
+						p.cache.refreshChance = p.cache.refreshChance * 1.1
+					}
+					if p.cache.refreshChance >= 1.0 {
+						p.cache.refreshChance = 1.0
+					}
+					if p.Config.debug {
+						log.Printf("Prismic - raising refresh chance to %.2f%%", p.cache.refreshChance*100.0)
+					}
+				}
+			}
 		}
 	}
 }
