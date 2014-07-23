@@ -60,7 +60,7 @@ func (c *Cache) Get(key string, refresh RefreshFn) (interface{}, error) {
 	var err error
 	e, found := c.get(key)
 
-	if found && e.validUntil.After(time.Now()) {
+	if found && (c.ttl <= 0 || e.validUntil.After(time.Now())) {
 		c.Stats.Hit++
 		// bad revision - old content is always returned
 		// and content is refreshed
@@ -111,7 +111,9 @@ func (c *Cache) refresh(e *CacheEntry, refresh RefreshFn) error {
 	}
 	e.entry = v
 	e.revision = c.revision
-	e.validUntil = time.Now().Add(c.ttl)
+	if c.ttl > 0 {
+		e.validUntil = time.Now().Add(c.ttl)
+	}
 	return nil
 }
 

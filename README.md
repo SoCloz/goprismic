@@ -58,9 +58,9 @@ Proxy
 A simple caching proxy is included.
 
 ```go
-// Up to 1000 documents will be cached for up to 1 hour. Documents will be asynchronously refreshed
+// Up to 1000 documents will be cached. Documents will be asynchronously refreshed
 // if the repository has been updated and cache is still valid (old content is returned, next request will return the new content)
-proxy, err := proxy.New("https://myrepo.prismic.io/api", "repo key", goprismic.DefaultConfig, proxy.Config{CacheSize: 1000, TTL: 1*time.Hour})
+proxy, err := proxy.New("https://myrepo.prismic.io/api", "repo key", goprismic.DefaultConfig, proxy.Config{CacheSize: 1000})
 
 // Not cached
 docs, err := proxy.Direct().Master().Form("everything").Submit()
@@ -77,6 +77,8 @@ doc, err := proxy.GetDocumentBy("product", "fieldname", "fieldvalue")
 // Cached
 res, err := proxy.Search().Form("menu").PageSize(200).Submit()
 ```
+
+You can set a TTL to cached content. If a content was loaded more than the TTL ago, it will be reloaded from prismic (ensuring that old content is never returned).
 
 Workers
 -------
