@@ -29,7 +29,6 @@ type Proxy struct {
 	Config Config
 
 	lastRefresh           time.Time
-	baselineRefreshChance float32
 }
 
 // Creates a proxy
@@ -54,7 +53,6 @@ func New(u, accessToken string, apiCfg goprismic.Config, cfg Config) (*Proxy, er
 		api:                   a,
 		Config:                cfg,
 		lastRefresh:           time.Now(),
-		baselineRefreshChance: cfg.BaselineRefreshChance,
 	}
 	go p.loopRefresh()
 	return p, nil
@@ -107,7 +105,7 @@ func (p *Proxy) Refresh() bool {
 	if oldRev != p.cache.revision {
 		p.lastRefresh = time.Now()
 		// refresh : 100% cache miss expected => we switch to baseline
-		p.cache.refreshChance = p.baselineRefreshChance
+		p.cache.refreshChance = p.Config.BaselineRefreshChance
 		if p.Config.debug {
 			log.Printf("Prismic - refreshing master ref and lowering refresh chance to %.1f%%", p.cache.refreshChance*100)
 		}
@@ -126,15 +124,9 @@ func (p *Proxy) loopRefresh() {
 			refreshed := p.Refresh()
 			deltaRefreshError := p.cache.Stats.RefreshError - prevRefreshError
 			deltaRefresh := p.cache.Stats.Refresh - prevRefresh
-			// ensure that chance is always > 0 and valid
-			refreshChance := float32(deltaRefresh+1) / float32(deltaRefresh+deltaRefreshError+1)
-			if refreshChance < p.baselineRefreshChance {
-				p.baselineRefreshChance = refreshChance
-				if p.Config.debug {
-					log.Printf("Prismic - lowering baseline refresh chance to %.2f%%", p.baselineRefreshChance*100.0)
-				}
-			}
-			if !refreshed {
+			prevRefreshError, prevRefresh = p.cache.Stats.RefreshError, p.cache.Stats.Refresh
+			if !refreshed && deltaRefresh+deltaRefreshError > 0 {
+				refreshChance := float32(deltaRefresh) / float32(deltaRefresh+deltaRefreshError) * p.cache.refreshChance
 				if refreshChance < p.cache.refreshChance {
 					p.cache.refreshChance = refreshChance
 					if p.Config.debug {
