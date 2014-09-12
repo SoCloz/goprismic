@@ -215,3 +215,16 @@ func (d *Document) GetLinkFragment(field string) (*fragment.Link, bool) {
 	}
 	return l, true
 }
+
+// Returns a geopoint fragment (returns the first found)
+func (d *Document) GetGeoPointFragment(field string) (*fragment.GeoPoint, bool) {
+	f, found := d.GetFragment(field)
+	if !found {
+		return nil, false
+	}
+	gp, ok := f.(*fragment.GeoPoint)
+	if !ok {
+		return nil, false
+	}
+	return gp, true
+}

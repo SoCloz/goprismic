@@ -1,6 +1,7 @@
 package goprismic
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -198,4 +199,14 @@ func (s *TestSuite) TestList(c *gocheck.C) {
 
 	content := "<ol><li>ol1</li><li>ol2</li><li>ol3</li></ol><ul><li>l1</li><li>l2</li><li>l3</li></ul>"
 	c.Assert(desc.AsHtml(), gocheck.Equals, content, gocheck.Commentf("Lists have the right rendering"))
+}
+
+func (s *TestSuite) TestGeoPoint(c *gocheck.C) {
+	geo, _ := s.doc.GetGeoPointFragment("location")
+
+	c.Assert(geo.Latitude, gocheck.Equals, 48.87687670000001, gocheck.Commentf("Geopoint has the correct latitude"))
+	c.Assert(geo.Longitude, gocheck.Equals, 2.3338801999999825, gocheck.Commentf("Geopoint has the correct longitude"))
+
+	content := fmt.Sprintf(`<div class="geopoint"><span class="latitude">%f</span><span class="longitude">%f</span></div>`, geo.Latitude, geo.Longitude)
+	c.Assert(geo.AsHtml(), gocheck.Equals, content, gocheck.Commentf("GeoPoints have the right rendering"))
 }
