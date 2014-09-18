@@ -116,17 +116,29 @@ func (p *Proxy) Refresh() bool {
 
 // Refreshes the master ref, returns true if master ref has changed
 func (p *Proxy) loopRefresh() {
-	prevRefreshError, prevRefresh := 0, 0
+	prevRefreshError, prevRefresh, lastNoError := 0, 0, 0
 	tick := time.Tick(p.Config.MasterRefresh)
 	for {
 		select {
 		case <-tick:
 			refreshed := p.Refresh()
-			deltaRefreshError := p.cache.Stats.RefreshError - prevRefreshError
-			deltaRefresh := p.cache.Stats.Refresh - prevRefresh
-			prevRefreshError, prevRefresh = p.cache.Stats.RefreshError, p.cache.Stats.Refresh
-			if !refreshed && deltaRefresh+deltaRefreshError > 0 {
-				refreshChance := float32(deltaRefresh) / float32(deltaRefresh+deltaRefreshError) * p.cache.refreshChance
+			if refreshed {
+				lastNoError = 0
+			} else {
+				deltaRefreshError := p.cache.Stats.RefreshError - prevRefreshError
+				deltaRefresh := p.cache.Stats.Refresh - prevRefresh
+				prevRefreshError, prevRefresh = p.cache.Stats.RefreshError, p.cache.Stats.Refresh
+				var refreshChance float32
+				if deltaRefreshError > 0 {
+					lastNoError = 0
+					refreshChance = float32(deltaRefresh) / float32(deltaRefresh+deltaRefreshError) * p.cache.refreshChance
+				} else {
+					lastNoError++
+					refreshChance = p.Config.BaselineRefreshChance*(1.0+float32(lastNoError*(lastNoError-1))/3)
+					if refreshChance > 1.0 {
+						refreshChance = 1.0
+					}
+				}
 				if refreshChance < p.cache.refreshChance {
 					p.cache.refreshChance = refreshChance
 					if p.Config.debug {
@@ -134,13 +146,10 @@ func (p *Proxy) loopRefresh() {
 					}
 				}
 				if refreshChance > p.cache.refreshChance {
-					if refreshChance < p.cache.refreshChance*1.1 {
-						p.cache.refreshChance = refreshChance
-					} else {
-						p.cache.refreshChance = p.cache.refreshChance * 1.1
-					}
-					if p.cache.refreshChance >= 1.0 {
+					if refreshChance >= 1.0 && p.cache.refreshChance >= 0.99 {
 						p.cache.refreshChance = 1.0
+					} else {
+						p.cache.refreshChance = (p.cache.refreshChance + refreshChance) / 2
 					}
 					if p.Config.debug {
 						log.Printf("Prismic - raising refresh chance to %.2f%%", p.cache.refreshChance*100.0)
