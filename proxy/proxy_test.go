@@ -91,7 +91,7 @@ func (s *ProxyTestSuite) TestTtl(c *gocheck.C) {
 	c.Assert(s.proxy.GetStats(), gocheck.DeepEquals, Stats{Get: 1, Miss: 1}, gocheck.Commentf("miss"))
 	s.proxy.GetDocument(d.Id)
 	c.Assert(s.proxy.GetStats(), gocheck.DeepEquals, Stats{Get: 2, Hit: 1, Miss: 1}, gocheck.Commentf("miss+hit"))
-
+	s.proxy.cache.updateRevision("foobar")
 	time.Sleep(12 * time.Second)
 	s.proxy.GetDocument(d.Id)
 	c.Assert(s.proxy.GetStats(), gocheck.DeepEquals, Stats{Get: 3, Hit: 1, Miss: 2}, gocheck.Commentf("miss+hit+refresh+miss"))
