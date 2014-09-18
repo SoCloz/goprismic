@@ -60,26 +60,28 @@ func (c *Cache) Get(key string, refresh RefreshFn) (interface{}, error) {
 	var err error
 	e, found := c.get(key)
 
-	if found && (e.refreshing || c.asyncDeadline.IsZero() || c.asyncDeadline.After(time.Now())) {
-		c.Stats.Hit++
-		// bad revision - old content is always returned
-		// and content is refreshed
+	if found {
 		if c.revision != e.revision && !e.refreshing {
-			if c.refreshChance == 1.0 || rand.Float32() <= c.refreshChance {
-				e.refreshing = true
-				go c.asyncRefresh(e, refresh)
+			if (c.asyncDeadline.IsZero() || c.asyncDeadline.After(time.Now())) {
+				c.Stats.Hit++
+				// async refresh
+				if c.refreshChance == 1.0 || rand.Float32() <= c.refreshChance {
+					e.refreshing = true
+					go c.asyncRefresh(e, refresh)
+				}
+			} else {
+				c.Stats.Miss++
+				err = c.refresh(e, refresh)
 			}
+		} else {
+			c.Stats.Hit++
 		}
 	} else {
 		c.Stats.Miss++
-		if !found {
-			e = &CacheEntry{}
-			err = c.refresh(e, refresh)
-			if err == nil {
-				c.add(key, e)
-			}
-		} else {
-			err = c.refresh(e, refresh)
+		e = &CacheEntry{}
+		err = c.refresh(e, refresh)
+		if err == nil {
+			c.add(key, e)
 		}
 	}
 	if err != nil {
