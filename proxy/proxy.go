@@ -100,9 +100,7 @@ func (p *Proxy) Search() *SearchForm {
 // Refreshes the master ref, returns true if master ref has changed
 func (p *Proxy) Refresh() bool {
 	p.api.Refresh()
-	oldRev := p.cache.revision
-	p.cache.revision = p.api.GetMasterRef()
-	if oldRev != p.cache.revision {
+	if p.cache.updateRevision(p.api.GetMasterRef()) {
 		p.lastRefresh = time.Now()
 		// refresh : 100% cache miss expected => we switch to baseline
 		p.cache.refreshChance = p.Config.BaselineRefreshChance

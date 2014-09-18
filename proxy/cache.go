@@ -23,7 +23,6 @@ type CacheEntry struct {
 	entry      interface{}
 	revision   string
 	refreshing bool
-	validUntil time.Time
 }
 
 // A cache
@@ -36,6 +35,7 @@ type Cache struct {
 	Stats         Stats
 	refreshChance float32
 	revision      string
+	asyncDeadline time.Time
 }
 
 type RefreshFn func() (interface{}, error)
@@ -60,7 +60,7 @@ func (c *Cache) Get(key string, refresh RefreshFn) (interface{}, error) {
 	var err error
 	e, found := c.get(key)
 
-	if found && (c.ttl <= 0 || e.validUntil.After(time.Now())) {
+	if found && (e.refreshing || c.asyncDeadline.IsZero() || c.asyncDeadline.After(time.Now())) {
 		c.Stats.Hit++
 		// bad revision - old content is always returned
 		// and content is refreshed
@@ -111,9 +111,6 @@ func (c *Cache) refresh(e *CacheEntry, refresh RefreshFn) error {
 	}
 	e.entry = v
 	e.revision = c.revision
-	if c.ttl > 0 {
-		e.validUntil = time.Now().Add(c.ttl)
-	}
 	return nil
 }
 
@@ -137,11 +134,22 @@ func (c *Cache) add(key string, e *CacheEntry) {
 			del := c.lru.Back()
 			delete(c.entries, del.Value.(*CacheEntry).key)
 			c.lru.Remove(del)
-			if time.Now().Before(e.validUntil) {
+			if c.revision == del.Value.(*CacheEntry).revision {
 				c.Stats.Eviction++
 			}
 		}
 	}
+}
+
+func (c *Cache) updateRevision(revision string) bool {
+	if revision == c.revision {
+		return false
+	}
+	c.revision = revision
+	if c.ttl > 0 {
+		c.asyncDeadline = time.Now().Add(c.ttl)
+	}
+	return true
 }
 
 // Clears the cache

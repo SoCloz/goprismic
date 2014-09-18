@@ -55,11 +55,10 @@ p.ResolveLinks(r)
 Proxy
 -----
 
-A simple caching proxy is included.
+A simple asynchronous caching proxy is included.
 
 ```go
-// Up to 1000 documents will be cached. Documents will be asynchronously refreshed
-// if the repository has been updated and cache is still valid (old content is returned, next request will return the new content)
+// Up to 1000 documents will be cached.
 proxy, err := proxy.New("https://myrepo.prismic.io/api", "repo key", goprismic.DefaultConfig, proxy.Config{CacheSize: 1000})
 
 // Not cached
@@ -78,7 +77,17 @@ doc, err := proxy.GetDocumentBy("product", "fieldname", "fieldvalue")
 res, err := proxy.Search().Form("menu").PageSize(200).Submit()
 ```
 
-You can set a TTL to cached content. If a content was loaded more than the TTL ago, it will be reloaded from prismic (ensuring that old content is never returned).
+When a document is updated :
+* between "update time" and "update time + TTL", documents are asynchronously refreshed (if a document is accessed, the cached version is returned, and the cache is asynchronously updated),
+* after "update time + TTL", documents are fetched directly from prismic (cache miss).
+
+If no ttl is set, refreshes are always asynchronous.
+
+You can define :
+* a refresh chance (between 0 and 1) - only a fraction of contents will be refreshed at a time, ensuring that prismic is not flooded after an update,
+* a master refresh interval - the proxy will check for updates at the defined frequency.
+
+The proxy will try to avoid flooding prismic by automatically lower/raise the refresh chance.
 
 Workers
 -------
