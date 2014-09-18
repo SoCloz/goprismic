@@ -12,11 +12,13 @@ import (
 type Config struct {
 	// Cache size
 	CacheSize int
-	// Documents are cached for a maximum time of ttl.
+	// TTL
+	// Cache is asynchronous during the TTL duration after an update.
 	TTL time.Duration
 	// API Master ref refresh frequency
+	// The proxy will check at this interval if something has changed.
 	MasterRefresh time.Duration
-	// Base refresh chance after master reference chance
+	// Base refresh chance after a master reference update, between 0 and 1
 	BaselineRefreshChance float32
 	// inherited from api
 	debug bool
