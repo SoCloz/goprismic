@@ -124,36 +124,41 @@ func (p *Proxy) loopRefresh() {
 			refreshed := p.Refresh()
 			if refreshed {
 				lastNoError = 0
+				continue
+			}
+
+			deltaRefreshError := p.cache.Stats.RefreshError - prevRefreshError
+			deltaRefresh := p.cache.Stats.Refresh - prevRefresh
+			if deltaRefresh+deltaRefreshError == 0 && p.cache.refreshChance == 1.0 {
+				continue
+			}
+
+			prevRefreshError, prevRefresh = p.cache.Stats.RefreshError, p.cache.Stats.Refresh
+			var refreshChance float32
+			if deltaRefreshError > 0 {
+				lastNoError = 0
+				refreshChance = float32(deltaRefresh) / float32(deltaRefresh+deltaRefreshError) * p.cache.refreshChance
 			} else {
-				deltaRefreshError := p.cache.Stats.RefreshError - prevRefreshError
-				deltaRefresh := p.cache.Stats.Refresh - prevRefresh
-				prevRefreshError, prevRefresh = p.cache.Stats.RefreshError, p.cache.Stats.Refresh
-				var refreshChance float32
-				if deltaRefreshError > 0 {
-					lastNoError = 0
-					refreshChance = float32(deltaRefresh) / float32(deltaRefresh+deltaRefreshError) * p.cache.refreshChance
+				lastNoError++
+				refreshChance = p.Config.BaselineRefreshChance*(1.0+float32(lastNoError*(lastNoError-1))/2)
+				if refreshChance > 1.0 {
+					refreshChance = 1.0
+				}
+			}
+			if refreshChance < p.cache.refreshChance {
+				p.cache.refreshChance = refreshChance
+				if p.Config.debug {
+					log.Printf("Prismic - lowering refresh chance to %.2f%%", p.cache.refreshChance*100.0)
+				}
+			}
+			if refreshChance > p.cache.refreshChance {
+				if refreshChance >= 1.0 && p.cache.refreshChance >= 0.99 {
+					p.cache.refreshChance = 1.0
 				} else {
-					lastNoError++
-					refreshChance = p.Config.BaselineRefreshChance*(1.0+float32(lastNoError*(lastNoError-1))/3)
-					if refreshChance > 1.0 {
-						refreshChance = 1.0
-					}
+					p.cache.refreshChance = (p.cache.refreshChance + refreshChance) / 2
 				}
-				if refreshChance < p.cache.refreshChance {
-					p.cache.refreshChance = refreshChance
-					if p.Config.debug {
-						log.Printf("Prismic - lowering refresh chance to %.2f%%", p.cache.refreshChance*100.0)
-					}
-				}
-				if refreshChance > p.cache.refreshChance {
-					if refreshChance >= 1.0 && p.cache.refreshChance >= 0.99 {
-						p.cache.refreshChance = 1.0
-					} else {
-						p.cache.refreshChance = (p.cache.refreshChance + refreshChance) / 2
-					}
-					if p.Config.debug {
-						log.Printf("Prismic - raising refresh chance to %.2f%%", p.cache.refreshChance*100.0)
-					}
+				if p.Config.debug {
+					log.Printf("Prismic - raising refresh chance to %.2f%%", p.cache.refreshChance*100.0)
 				}
 			}
 		}
