@@ -25,10 +25,20 @@ func (i *View) Decode(enc interface{}) error {
 		i.Url = v.(string)
 	}
 	if v, found := dec["alt"]; found {
-		i.Alt = v.(string)
+		switch v.(type) {
+		case string:
+			i.Alt = v.(string)
+		default:
+			i.Alt = ""
+		}
 	}
 	if v, found := dec["copyright"]; found {
-		i.Copyright = v.(string)
+		switch v.(type) {
+		case string:
+			i.Copyright = v.(string)
+		default:
+			i.Copyright = ""
+		}
 	}
 	if d, found := dec["dimensions"]; found {
 		dim, ok := d.(map[string]interface{})
